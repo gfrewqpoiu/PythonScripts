@@ -38,7 +38,7 @@ async def get_videos_to_convert(folder: rclone.RcloneDirectory):
 
 
 async def upload(file, dest):
-    pass
+    await rclone.copy(file, dest)
 
 
 async def convert(filepath):
@@ -64,10 +64,6 @@ async def main(drive, path=basepath):
             await upload(newfilepath, newcloudpath)
             print("Uploaded it")
             await cleanup()
-
-
-
-
 
 
 if __name__ == '__main__':
