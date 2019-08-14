@@ -27,15 +27,20 @@ async def get_folder_content(folder: rclone.RcloneDirectory):
 
 async def get_videos_to_convert(folder: rclone.RcloneItem):
     queue = []
-    if not isinstance(folder, rclone.RcloneDirectory):
-        return queue
-    content = await get_folder_content(folder)
-    for item in content:
-        if isinstance(item, rclone.RcloneFile):
-            type = str(item.filetype)
-            if type.startswith('video'):
-                if type != 'video/mp4':
-                    queue.append(item)
+
+    def checkfile(file):
+        type = str(file.filetype)
+        if type.startswith('video'):
+            if type != 'video/mp4':
+                queue.append(item)
+
+    if isinstance(folder, rclone.RcloneFile):
+        checkfile(folder)
+
+    else:
+        content = await get_folder_content(folder)
+        for item in content:
+            checkfile(item)
     return queue
 
 
