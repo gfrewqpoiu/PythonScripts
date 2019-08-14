@@ -40,7 +40,7 @@ async def get_videos_to_convert(folder: rclone.RcloneItem):
     else:
         content = await get_folder_content(folder)
         for item in content:
-            if isinstance(rclone.RcloneFile):
+            if isinstance(item, rclone.RcloneFile):
                 checkfile(item)
     return queue
 
