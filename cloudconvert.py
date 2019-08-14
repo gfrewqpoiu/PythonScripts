@@ -64,6 +64,8 @@ async def main(drive, path=basepath):
             await upload(newfilepath, newcloudpath)
             print("Uploaded it")
             await cleanup()
+            if item.extension not in ['.mov', '.mkv']:
+                await rclone.rm(item.fullpath)
 
 
 if __name__ == '__main__':

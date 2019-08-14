@@ -1,9 +1,9 @@
-from os.path import splitext
-import json
-import decimal
 import asyncio
+import decimal
+import json
+from os.path import splitext
+
 from asyncrun import asyncrun
-import shlex
 
 rclone_flags = '--fast-list'
 
@@ -168,6 +168,10 @@ async def copy(src_full_path: str, dest_full_path: str):
 
 async def move(src_full_path: str, dest_full_path: str):
     await asyncrun('rclone', 'move', src_full_path, dest_full_path, '-c', rclone_flags)
+
+
+async def rm(full_path):
+    await asyncrun('rclone', 'rm', full_path, rclone_flags)
 
 async def main():
     tree = await(ls('Drive', ''))
