@@ -32,7 +32,7 @@ async def get_videos_to_convert(folder: rclone.RcloneItem):
         type = str(file.filetype)  # Finally
         if type.startswith('video'):
             if type != 'video/mp4':
-                queue.append(item)
+                queue.append(file)
 
     if isinstance(folder, rclone.RcloneFile):
         checkfile(folder)
