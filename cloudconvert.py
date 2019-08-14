@@ -67,7 +67,7 @@ async def main(drive, path=basepath):
             print("Uploaded it")
             await cleanup()
             if item.extension not in ['.mov', '.mkv']:
-                await rclone.rm(item.fullpath)
+                await rclone.delete_file(item.fullpath)
 
 
 if __name__ == '__main__':
