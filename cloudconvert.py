@@ -25,8 +25,10 @@ async def get_folder_content(folder: rclone.RcloneDirectory):
     return content
 
 
-async def get_videos_to_convert(folder: rclone.RcloneDirectory):
+async def get_videos_to_convert(folder: rclone.RcloneItem):
     queue = []
+    if not isinstance(folder, rclone.RcloneDirectory):
+        return queue
     content = await get_folder_content(folder)
     for item in content:
         if isinstance(item, rclone.RcloneFile):
