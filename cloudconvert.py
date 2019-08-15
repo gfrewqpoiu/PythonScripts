@@ -52,7 +52,7 @@ async def upload(file, dest):
 async def convert(filepath):
     newfilepath, oldext = os.path.splitext(filepath)
     await video_convert.convert(filepath, newfilepath + '.mp4')
-    return newfilepath
+    return newfilepath + '.mp4'
 
 
 async def cleanup(path=temppath):

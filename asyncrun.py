@@ -9,5 +9,6 @@ async def asyncrun(cmd, *args):
 
 
 async def asyncrun_quiet(cmd, *args):
-	proc = await asyncio.subprocess.create_subprocess_exec(cmd, *args, stdout=asyncio.subprocess.DEVNULL)
-	await proc.wait()
+    proc = await asyncio.subprocess.create_subprocess_exec(cmd, *args, stdout=asyncio.subprocess.DEVNULL,
+                                                           stderr=asyncio.subprocess.DEVNULL)
+    await proc.wait()

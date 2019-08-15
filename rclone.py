@@ -31,6 +31,7 @@ def filetype(item):
 class RcloneItem():
     def __init__(self, item, drive, path):
         self.drive = drive
+        self.parent = path
         self.path = path + item['Path']
         self.fullpath = drive + ':' + self.path
         self.name = item['Name']
@@ -164,7 +165,7 @@ async def fetch_hash(full_path: str):
 
 
 async def copy(src_full_path: str, dest_full_path: str):
-    await asyncrun('rclone', 'copyto', src_full_path, dest_full_path, '-c', rclone_flags)
+    await asyncrun('rclone', 'copy', src_full_path, dest_full_path, '-c', rclone_flags)
 
 async def move(src_full_path: str, dest_full_path: str):
     await asyncrun('rclone', 'move', src_full_path, dest_full_path, '-c', rclone_flags)
