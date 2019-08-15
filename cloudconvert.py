@@ -68,7 +68,7 @@ async def main(drive, path=basepath):
             print("Downloaded: " + item.name)
             newfilepath = await convert(filepath)
             print("Converted it")
-            newcloudpath = item.drive + ':' + item.purename + '.mp4'
+            newcloudpath = item.fullpath.replace(item.name, "")
             await upload(newfilepath, newcloudpath)
             print("Uploaded it")
             await cleanup()
