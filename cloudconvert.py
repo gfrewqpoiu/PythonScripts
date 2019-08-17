@@ -89,8 +89,8 @@ async def get_videos_to_convert(folder: rclone.RcloneItem):
 
 async def check_already_converted(file: rclone.RcloneFile):
     parentfolder = file.parent
-    parentfolder = await rclone.ls(file.drive, parentfolder)
-    for item in parentfolder.get_contents():
+    contents = await rclone.ls(file.drive, parentfolder)
+    for item in contents:
         if file.purename + '.mp4' == item.name:
             return False
     return True
