@@ -87,43 +87,52 @@ async def get_videos_to_convert(folder: rclone.RcloneItem):
     return queue
 
 
-async def check_already_converted(file: rclone.RcloneFile):
+async def check_already_converted(file: rclone.RcloneFile, contents: [rclone.RcloneItem]):
     parentfolder = file.parent
-    contents = await rclone.ls(file.drive, parentfolder)
     for item in contents:
         if file.purename + '.mp4' == item.name:
-            return False
-    return True
+            return True
+    return False
 
 
-async def checkfile(file: rclone.RcloneFile):
+async def check_to_convert(file: rclone.RcloneFile, contents: [rclone.RcloneItem]):
+    """Checks if the given file needs to be converted."""
     type = str(file.filetype)  # Finally
     if type.startswith('video'):
         if type != 'video/mp4':
-            if not await check_already_converted(file):
+            already_there = await check_already_converted(file, contents)
+            if not already_there:
                 return True
-        else:
-            return False
+    else:
+        return False
 
 
 async def worker(queue: asyncio.Queue):
     while True:
         job = await queue.get()
         await job.run()
+        logging.log(f"{queue.qsize()} items left to do")
         queue.task_done()
 
 
 async def main(drive, path=basepath):
-    queue = asyncio.Queue(maxsize=3)
-    log = logging.getLogger()
-    content = await rclone.flatls(drive, path)
-    task = asyncio.create_task(worker(queue))
-    for item in content:
-        if isinstance(item, rclone.RcloneFile):
-            if await checkfile(item):
-                job = Job(inputfile=item)
-                await queue.put(job)
+    async def search(folder: rclone.RcloneDirectory):
+        contents = await folder.get_contents()
+        for item in contents:
+            if isinstance(item, rclone.RcloneDirectory):
+                await search(item)
+            elif isinstance(item, rclone.RcloneFile):
+                to_convert = await check_to_convert(item, contents)
+                if to_convert:
+                    job = Job(inputfile=item)
+                    await queue.put(job)
 
+    queue = asyncio.Queue()
+    log = logging.getLogger()
+    root = await rclone.tree(drive, path)
+    task = asyncio.create_task(worker(queue))
+    await search(root)
+    log.info(f"Found {queue.qsize()} items to convert")
     await queue.join()
     task.cancel()
     log.info("Done with all the conversions!")

@@ -2,11 +2,13 @@ import asyncio
 import decimal
 import json
 import os.path
+import shlex
 from os.path import splitext
 
 from asyncrun import asyncrun
 
 rclone_flags = '--fast-list'
+
 
 def decode(input):
     if input is None:
@@ -141,13 +143,14 @@ class RcloneDirectory(RcloneItem):
         return self._amount
 
 
-async def ls(drive, directory="", recursive_flat=False):
+async def ls(drive, directory="", recursive_flat=False) -> [RcloneItem]:
     if not directory.endswith('/'):
         directory = directory + '/'
+    src = drive + ":" + directory
     if recursive_flat:
-        res = await asyncrun('rclone', 'lsjson', f'{drive}:{directory}', rclone_flags, "-R")
+        res = await asyncrun('rclone', 'lsjson', src, rclone_flags, "-R")
     else:
-        res = await asyncrun('rclone', 'lsjson', f'{drive}:{directory}', rclone_flags)
+        res = await asyncrun('rclone', 'lsjson', src, rclone_flags)
     result = decode(res)
     results = []
     for item in result:
@@ -160,7 +163,7 @@ async def ls(drive, directory="", recursive_flat=False):
     return results
 
 
-async def tree(drive, directory):
+async def tree(drive, directory) -> RcloneDirectory:
     def fill_path(path: RcloneDirectory, list: list):
         for item in list:
             if item.parent == path.path:
@@ -168,6 +171,7 @@ async def tree(drive, directory):
 
         path.populated = True
 
+    directory = shlex.quote(directory)
     name = os.path.dirname(directory)
     item = {'Path': directory, 'Name': os.path.basename(name), 'IsDir': True}
     root = RcloneDirectory(item, drive, "")
@@ -178,13 +182,14 @@ async def tree(drive, directory):
     for item in fulltree:
         if isinstance(item, RcloneDirectory):
             fill_path(item, fulltree)
-    return tree
+    return tree[0]
 
 
-async def flatls(drive, directory):
+async def flatls(drive, directory) -> [RcloneItem]:
     return await ls(drive, directory, recursive_flat=True)
 
 async def size(full_path: str):
+    full_path = full_path.replace(" ", "\ ")
     result = await asyncrun('rclone', 'size', full_path, '--json', rclone_flags)
     results = decode(result)
     amount = results['count']
@@ -193,6 +198,7 @@ async def size(full_path: str):
 
 
 async def fetch_hash(full_path: str):
+    full_path = full_path.replace(" ", "\ ")
     res = await asyncrun('rclone', 'md5sum', full_path, rclone_flags)
     return res
 
