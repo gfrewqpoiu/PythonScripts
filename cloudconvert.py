@@ -102,6 +102,7 @@ async def worker(queue: asyncio.Queue):
         await job.run()
         queue.task_done()
 
+
 async def main(drive, path=basepath):
     queue = asyncio.Queue(maxsize=3)
     log = logging.getLogger()
@@ -116,6 +117,7 @@ async def main(drive, path=basepath):
     await queue.join()
     task.cancel()
     log.info("Done with all the conversions!")
+
 
 if __name__ == '__main__':
     asyncio.run(main('Drive'))
