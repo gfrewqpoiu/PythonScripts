@@ -141,13 +141,13 @@ class RcloneDirectory(RcloneItem):
         return self._amount
 
 
-async def ls(drive, directory="", recursive_fill=False, recursive_flat=False):
+async def ls(drive, directory="", recursive_flat=False):
     if not directory.endswith('/'):
         directory = directory + '/'
-    recursive = ""
     if recursive_flat:
-        recursive = "-R"
-    res = await asyncrun('rclone', 'lsjson', f'{drive}:{directory}', rclone_flags, recursive)
+        res = await asyncrun('rclone', 'lsjson', f'{drive}:{directory}', rclone_flags, "-R")
+    else:
+        res = await asyncrun('rclone', 'lsjson', f'{drive}:{directory}', rclone_flags)
     result = decode(res)
     results = []
     for item in result:
@@ -155,8 +155,6 @@ async def ls(drive, directory="", recursive_fill=False, recursive_flat=False):
             results.append(RcloneFile(item, drive, directory))
         else:
             dir = RcloneDirectory(item, drive, directory)
-            if recursive_fill:
-                await dir.get_contents(True)
             results.append(dir)
 
     return results
