@@ -100,7 +100,7 @@ def checkfile(file: rclone.RcloneFile):
     type = str(file.filetype)  # Finally
     if type.startswith('video'):
         if type != 'video/mp4':
-            if not check_already_converted(file):
+            if not await check_already_converted(file):
                 return True
         else:
             return False
