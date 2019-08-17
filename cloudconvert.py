@@ -73,29 +73,18 @@ async def get_folder_content(folder: rclone.RcloneDirectory):
     return content
 
 
-async def get_videos_to_convert(folder: rclone.RcloneItem):
-    queue = []
-
-    def checkfile(file):
-        type = str(file.filetype)  # Finally
-        if type.startswith('video'):
-            if type != 'video/mp4':
-                queue.append(file)
-
-    if isinstance(folder, rclone.RcloneFile):
-        checkfile(folder)
-    return queue
-
-
-async def check_already_converted(file: rclone.RcloneFile, contents: [rclone.RcloneItem]):
-    parentfolder = file.parent
+async def check_already_converted(file: rclone.RcloneFile, contents: [rclone.RcloneItem]) -> bool:
+    """Checks whether the given file is already converted in the given contents
+    :param file The file to check
+    :param contents A list of contents.
+    :returns True or false"""
     for item in contents:
         if file.purename + '.mp4' == item.name:
             return True
     return False
 
 
-async def check_to_convert(file: rclone.RcloneFile, contents: [rclone.RcloneItem]):
+async def check_to_convert(file: rclone.RcloneFile, contents: [rclone.RcloneItem]) -> bool:
     """Checks if the given file needs to be converted."""
     type = str(file.filetype)  # Finally
     if type.startswith('video'):
