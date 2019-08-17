@@ -96,7 +96,7 @@ async def check_already_converted(file: rclone.RcloneFile):
     return True
 
 
-def checkfile(file: rclone.RcloneFile):
+async def checkfile(file: rclone.RcloneFile):
     type = str(file.filetype)  # Finally
     if type.startswith('video'):
         if type != 'video/mp4':
@@ -120,7 +120,7 @@ async def main(drive, path=basepath):
     task = asyncio.create_task(worker(queue))
     for item in content:
         if isinstance(item, rclone.RcloneFile):
-            if checkfile(item):
+            if await checkfile(item):
                 job = Job(inputfile=item)
                 await queue.put(job)
 
