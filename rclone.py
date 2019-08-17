@@ -211,7 +211,7 @@ async def move(src_full_path: str, dest_full_path: str):
 
 
 async def delete_file(full_path):
-    await asyncrun('rclone', 'deletefile', full_path, rclone_flags)
+    await asyncrun('rclone', 'deletefile', full_path, rclone_flags, '--drive-use-trash=true')
 
 async def main():
     tree = await(ls('Drive', ''))
