@@ -1,0 +1,26 @@
+{
+  "_meta": {
+    "hash": {
+      "sha256": "b9ddce6d7c8832b7593e3dba738fabc7e96cadb2045535ac3fbf6bbe8a1f5411"
+    },
+    "pipfile-spec": 6,
+    "requires": {
+      "python_version": "3.7"
+    },
+    "sources": [
+      {
+        "name": "pypi",
+        "url": "https://pypi.org/simple",
+        "verify_ssl": true
+      }
+    ]
+  },
+  "default": {
+    "aiofiles": {
+      "editable": true,
+      "git": "https://github.com/Tinche/aiofiles.git",
+      "ref": "145107595fe72b877005fb4ebf9d77ffb754689a"
+    }
+  },
+  "develop": {}
+}
