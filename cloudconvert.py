@@ -78,8 +78,9 @@ async def check_already_converted(file: rclone.RcloneFile, contents: [rclone.Rcl
     :param file The file to check
     :param contents A list of contents.
     :returns True or false"""
+    filename, ext = os.path.splitext(file.name)
     for item in contents:
-        if file.purename + '.mp4' == item.name:
+        if filename + '.mp4' == item.name:
             return True
     return False
 
