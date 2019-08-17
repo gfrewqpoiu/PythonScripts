@@ -108,10 +108,11 @@ async def check_to_convert(file: rclone.RcloneFile, contents: [rclone.RcloneItem
 
 
 async def worker(queue: asyncio.Queue):
+    log = logging.getLogger()
     while True:
         job = await queue.get()
         await job.run()
-        logging.log(f"{queue.qsize()} items left to do")
+        log.info(f"{queue.qsize()} items left to do")
         queue.task_done()
 
 
