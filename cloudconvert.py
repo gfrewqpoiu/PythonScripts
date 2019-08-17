@@ -1,18 +1,66 @@
 import asyncio.queues
+import logging
 import os
-import shutil
+
+import aiofiles.os as asyncos
 
 import rclone
 import video_convert
 
 temppath = os.getcwd() + "/tmp/"
 basepath = "Videos/"
-queue = []
+
+logging.basicConfig(level=logging.INFO)
 
 
-async def download(file: rclone.RcloneFile):
-    await rclone.copy(file.fullpath, temppath)
-    return temppath + file.name
+class Job():
+    _temppath = temppath
+    newext = ".mp4"
+    log = logging.getLogger()
+
+    def __init__(self, inputfile: rclone.RcloneFile):
+        self.is_downloaded = False
+        self.is_converted = False
+        self.is_uploaded = False
+        self.inputfile = inputfile
+        self.path = self._temppath + self.inputfile.name
+        self.newfilepath, self.oldext = os.path.splitext(self.path)
+        self.newfilepath += self.newext
+        self.parentpath = self.inputfile.fullpath.replace(self.inputfile.name, "")
+        self.newname, self.oldext = os.path.splitext(self.inputfile.name)
+        self.newname += self.newext
+        self.log.debug("New Job created with:")
+        self.log.debug("Inputtfile: " + inputfile.path)
+
+    async def download(self):
+        await rclone.copy(self.inputfile.fullpath, self._temppath)
+        self.is_downloaded = True
+        self.log.info("Downloaded file: " + self.inputfile.name)
+
+    async def convert(self):
+        if not self.is_downloaded:
+            raise FileNotFoundError
+        self.log.debug("Started conversion of: " + self.inputfile.name)
+        await video_convert.convert(self.path, self.newfilepath)
+        self.log.info("Finished conversion of: " + self.newname)
+        self.is_converted = True
+
+    async def upload(self):
+        self.log.debug("Starting upload of: " + self.newname)
+        await rclone.copy(self.newfilepath, self.parentpath)
+        self.log.info("Finished upload of: " + self.newname)
+
+    async def cleanup(self):
+        await asyncos.remove(self.path)
+        await asyncos.remove(self.newfilepath)
+        if self.oldext not in ['.mkv', '.mov']:
+            await rclone.delete_file(self.inputfile.fullpath)
+
+    async def run(self):
+        await self.download()
+        await self.convert()
+        await self.upload()
+        await self.cleanup()
 
 
 async def get_path_content(drive, path):
@@ -36,45 +84,38 @@ async def get_videos_to_convert(folder: rclone.RcloneItem):
 
     if isinstance(folder, rclone.RcloneFile):
         checkfile(folder)
-
-    else:
-        content = await get_folder_content(folder)
-        for item in content:
-            if isinstance(item, rclone.RcloneFile):
-                checkfile(item)
     return queue
 
 
-async def upload(file, dest):
-    await rclone.copy(file, dest)
+def checkfile(file: rclone.RcloneFile):
+    type = str(file.filetype)  # Finally
+    if type.startswith('video'):
+        if type != 'video/mp4':
+            return True
+        else:
+            return False
 
 
-async def convert(filepath):
-    newfilepath, oldext = os.path.splitext(filepath)
-    await video_convert.convert(filepath, newfilepath + '.mp4')
-    return newfilepath + '.mp4'
-
-
-async def cleanup(path=temppath):
-    shutil.rmtree(path)
+async def worker(queue: asyncio.Queue):
+    while True:
+        job = await queue.get()
+        await job.run()
+        queue.task_done()
 
 async def main(drive, path=basepath):
-    content = await get_path_content(drive, path)
+    queue = asyncio.Queue(maxsize=3)
+    log = logging.getLogger()
+    content = await rclone.flatls(drive, path)
+    task = asyncio.create_task(worker(queue))
     for item in content:
-        to_convert = await get_videos_to_convert(item)
-        for item in to_convert:
-            print("Starting Download of: " + item.name)
-            filepath = await download(item)
-            print("Downloaded: " + item.name)
-            newfilepath = await convert(filepath)
-            print("Converted it")
-            newcloudpath = item.fullpath.replace(item.name, "")
-            await upload(newfilepath, newcloudpath)
-            print("Uploaded it")
-            await cleanup()
-            if item.extension not in ['.mov', '.mkv']:
-                await rclone.delete_file(item.fullpath)
+        if isinstance(item, rclone.RcloneFile):
+            if checkfile(item):
+                job = Job(inputfile=item)
+                await queue.put(job)
 
+    await queue.join()
+    task.cancel()
+    log.info("Done with all the conversions!")
 
 if __name__ == '__main__':
     asyncio.run(main('Drive'))

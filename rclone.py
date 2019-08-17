@@ -1,6 +1,7 @@
 import asyncio
 import decimal
 import json
+import os.path
 from os.path import splitext
 
 from asyncrun import asyncrun
@@ -29,12 +30,17 @@ def filetype(item):
 
 
 class RcloneItem():
-    def __init__(self, item, drive, path):
+    def __init__(self, item, drive, path, parent=None):
         self.drive = drive
-        self.parent = path
         self.path = path + item['Path']
         self.fullpath = drive + ':' + self.path
         self.name = item['Name']
+        if parent is None:
+            self.parent = self.path.replace(self.name, "")
+            if self.parent.endswith("//"):
+                self.parent.replace("//", "/")
+        else:
+            self.parent = parent
         self.is_directory = False
         self._size = None
         self._hash = None
@@ -73,8 +79,8 @@ class RcloneItem():
 
 
 class RcloneFile(RcloneItem):
-    def __init__(self, item, drive, path):
-        super().__init__(item, drive, path)
+    def __init__(self, item, drive, path, parent=None):
+        super().__init__(item, drive, path, parent)
         self.filetype = item['MimeType']
         self.purename, self.extension = splitext(self.path)
         if int(item["Size"]) > 0:
@@ -101,9 +107,11 @@ class RcloneFile(RcloneItem):
             return False
 
 class RcloneDirectory(RcloneItem):
-    def __init__(self, item, drive, path):
-        super().__init__(item, drive, path)
+    def __init__(self, item, drive, path, parent=None):
+        super().__init__(item, drive, path, parent)
         self.is_directory = True
+        if not self.path.endswith("/"):
+            self.path += "/"
         self.populated = False
         self._contents = []
 
@@ -133,10 +141,13 @@ class RcloneDirectory(RcloneItem):
         return self._amount
 
 
-async def ls(drive, directory="", recursive=False):
+async def ls(drive, directory="", recursive_fill=False, recursive_flat=False):
     if not directory.endswith('/'):
         directory = directory + '/'
-    res = await asyncrun('rclone', 'lsjson', f'{drive}:{directory}', rclone_flags)
+    recursive = ""
+    if recursive_flat:
+        recursive = "-R"
+    res = await asyncrun('rclone', 'lsjson', f'{drive}:{directory}', rclone_flags, recursive)
     result = decode(res)
     results = []
     for item in result:
@@ -144,12 +155,36 @@ async def ls(drive, directory="", recursive=False):
             results.append(RcloneFile(item, drive, directory))
         else:
             dir = RcloneDirectory(item, drive, directory)
-            if recursive:
+            if recursive_fill:
                 await dir.get_contents(True)
             results.append(dir)
 
     return results
 
+
+async def tree(drive, directory):
+    def fill_path(path: RcloneDirectory, list: list):
+        for item in list:
+            if item.parent == path.path:
+                path._contents.append(item)
+
+        path.populated = True
+
+    name = os.path.dirname(directory)
+    item = {'Path': directory, 'Name': os.path.basename(name), 'IsDir': True}
+    root = RcloneDirectory(item, drive, "")
+    fulltree = await flatls(drive, directory)
+    tree = []
+    tree.append(root)
+    fulltree.append(root)
+    for item in fulltree:
+        if isinstance(item, RcloneDirectory):
+            fill_path(item, fulltree)
+    return tree
+
+
+async def flatls(drive, directory):
+    return await ls(drive, directory, recursive_flat=True)
 
 async def size(full_path: str):
     result = await asyncrun('rclone', 'size', full_path, '--json', rclone_flags)
