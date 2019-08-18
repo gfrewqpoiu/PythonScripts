@@ -16,6 +16,9 @@ async def asyncrun(cmd, *args):
 async def asyncrun_quiet(cmd, *args):
     """Runs the given command quietly and waits until it is completed."""
     log.debug(f"Quietly Running cmd {cmd} with {list(args)}")
-    proc = await asyncio.subprocess.create_subprocess_exec(cmd, *args, stdout=asyncio.subprocess.DEVNULL,
+    proc = await asyncio.subprocess.create_subprocess_exec(cmd, *args, stdout=asyncio.subprocess.PIPE,
                                                            stderr=asyncio.subprocess.DEVNULL)
+    out = await proc.stdout.read()
+    out = out.decode().rstrip()
     await proc.wait()
+    return out
