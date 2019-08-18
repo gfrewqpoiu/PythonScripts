@@ -1,4 +1,10 @@
 {
     "python.pythonPath": ".venv/bin/python",
-    "python.terminal.activateEnvironment": false
+    "python.terminal.activateEnvironment": false,
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    }
 }
