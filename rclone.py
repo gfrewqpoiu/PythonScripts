@@ -4,9 +4,8 @@ import json
 import os.path
 import shlex
 from os.path import splitext
-
 from asyncrun import asyncrun
-
+from abc import ABC
 rclone_flags = '--fast-list'
 
 
@@ -31,7 +30,7 @@ def filetype(item):
     return item['MimeType']
 
 
-class RcloneItem():
+class RcloneItem(ABC):
     def __init__(self, item, drive, path, parent=None):
         self.drive = drive
         self.path = path + item['Path']
