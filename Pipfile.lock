@@ -1,26 +1,39 @@
 {
-  "_meta": {
-    "hash": {
-      "sha256": "b9ddce6d7c8832b7593e3dba738fabc7e96cadb2045535ac3fbf6bbe8a1f5411"
+    "_meta": {
+        "hash": {
+            "sha256": "7becfdd7534eb57abad6084ff31015bae6d603145f65d1de6381c18718e365e4"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.7"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
     },
-    "pipfile-spec": 6,
-    "requires": {
-      "python_version": "3.7"
+    "default": {
+        "aiofiles": {
+            "editable": true,
+            "git": "https://github.com/Tinche/aiofiles.git",
+            "ref": "145107595fe72b877005fb4ebf9d77ffb754689a"
+        },
+        "appscript": {
+            "hashes": [
+                "sha256:0a7c87276f93318d2fb0c56530cfd974f62ea33e07e124cf903f46a7398abffc",
+                "sha256:35c2ba2894348413a29daa19008d5f1c349a832206eccc97ded50cee3ad852e5",
+                "sha256:87dbe865fcdeb06ff6f684759f3e5abbaa758500dc4776befed87e2819f579e6",
+                "sha256:8fe992508ce705b22772499c48682c81228743f527cb16bfc29e020f2d081cf3",
+                "sha256:ce4d530f33a838213bf52a0ddb813177bd13d9d31e262357a04306dea2c263f1",
+                "sha256:ce9acf845dfbf894ea1aec4373f4d4275b9f0a5380ad4c6aa2f958a3d2d39559"
+            ],
+            "index": "pypi",
+            "markers": "sys_platform == 'darwin'",
+            "version": "==1.1.0"
+        }
     },
-    "sources": [
-      {
-        "name": "pypi",
-        "url": "https://pypi.org/simple",
-        "verify_ssl": true
-      }
-    ]
-  },
-  "default": {
-    "aiofiles": {
-      "editable": true,
-      "git": "https://github.com/Tinche/aiofiles.git",
-      "ref": "145107595fe72b877005fb4ebf9d77ffb754689a"
-    }
-  },
-  "develop": {}
+    "develop": {}
 }

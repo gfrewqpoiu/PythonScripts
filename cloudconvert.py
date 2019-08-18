@@ -63,12 +63,12 @@ class Job():
         await self.cleanup()
 
 
-async def get_path_content(drive, path):
+async def get_path_content(drive, path) -> [rclone.RcloneItem]:
     content = await rclone.ls(drive, path)
     return content
 
 
-async def get_folder_content(folder: rclone.RcloneDirectory):
+async def get_folder_content(folder: rclone.RcloneDirectory) -> [rclone.RcloneItem]:
     content = await folder.get_contents()
     return content
 
