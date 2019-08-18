@@ -132,3 +132,5 @@ Würde .idea/workspace.xml löschen
 Würde .venv/ löschen
 Würde __pycache__/ löschen
 Würde tmp/ löschen
+tmp/
+.idea/
