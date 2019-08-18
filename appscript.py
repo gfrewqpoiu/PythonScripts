@@ -1,5 +1,4 @@
 import sys
-
 if sys.platform != 'darwin':
     raise EnvironmentError("This script only works in macOS!")
 import appscript

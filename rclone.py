@@ -27,11 +27,9 @@ def split(list):
     return files, folders
 
 
-def filetype(item):
-    return item['MimeType']
-
-
 class RcloneItem(ABC):
+    """Represents the concept of an object on a rclone Drive.
+    Both files and folders."""
     def __init__(self, item, drive, path, parent=None):
         self.drive = drive
         self.path = path + item['Path']
@@ -81,6 +79,7 @@ class RcloneItem(ABC):
 
 
 class RcloneFile(RcloneItem):
+    """Represents a file on a Rclone Drive"""
     def __init__(self, item, drive, path, parent=None):
         super().__init__(item, drive, path, parent)
         self.filetype = item['MimeType']
@@ -109,6 +108,7 @@ class RcloneFile(RcloneItem):
             return False
 
 class RcloneDirectory(RcloneItem):
+    """Represents a folder on a rclone Drive"""
     def __init__(self, item, drive, path, parent=None):
         super().__init__(item, drive, path, parent)
         self.is_directory = True
@@ -189,7 +189,6 @@ async def flatls(drive, directory) -> [RcloneItem]:
     return await ls(drive, directory, recursive_flat=True)
 
 async def size(full_path: str):
-    full_path = full_path.replace(" ", "\ ")
     result = await asyncrun('rclone', 'size', full_path, '--json', rclone_flags)
     results = decode(result)
     amount = results['count']
@@ -198,7 +197,6 @@ async def size(full_path: str):
 
 
 async def fetch_hash(full_path: str):
-    full_path = full_path.replace(" ", "\ ")
     res = await asyncrun('rclone', 'md5sum', full_path, rclone_flags)
     return res
 

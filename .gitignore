@@ -134,3 +134,6 @@ Würde __pycache__/ löschen
 Würde tmp/ löschen
 tmp/
 .idea/
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal

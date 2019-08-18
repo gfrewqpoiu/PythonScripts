@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+jupyter = "*"
 
 [packages]
 aiofiles = {editable = true,git = "https://github.com/Tinche/aiofiles.git"}
