@@ -6,6 +6,7 @@ import shlex
 from os.path import splitext
 from asyncrun import asyncrun
 from abc import ABC
+
 rclone_flags = '--fast-list'
 
 
@@ -212,6 +213,7 @@ async def move(src_full_path: str, dest_full_path: str):
 async def delete_file(full_path):
     await asyncrun('rclone', 'deletefile', full_path, rclone_flags, '--drive-use-trash=true')
 
+
 async def main():
     tree = await(ls('Drive', ''))
     print("Files:")
@@ -225,6 +227,7 @@ async def main():
             print(item.name)
             if item.name == "Canary Mail":
                 print(await item.get_amount())
+
 
 if __name__ == '__main__':
     asyncio.run(main())
