@@ -62,7 +62,10 @@ async def splitup(files):
 
 
 async def movefile(file, dest):
-    await asyncos.rename(file, dest)
+    try:
+        await asyncos.rename(file, dest)
+    except FileExistsError:
+        pass
 
 
 async def maybemovefile(file, dest):
