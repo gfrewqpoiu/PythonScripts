@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 jupyter = "*"
+pyinstaller = "*"
 
 [packages]
 aiofiles = {editable = true,git = "https://github.com/Tinche/aiofiles.git"}
