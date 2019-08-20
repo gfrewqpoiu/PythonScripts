@@ -52,6 +52,9 @@ def getErrorWindow(text="Error"):
     sg.PopupError(text)
 
 
+def getPopup(text: str):
+    sg.Popup(text)
+
 if __name__ == '__main__':
     pprint.pprint(home)
     pprint.pprint(getInputWindow())

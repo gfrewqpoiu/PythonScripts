@@ -3,9 +3,10 @@ import decimal
 import json
 import os.path
 import shlex
-from os.path import splitext
-from asyncrun import asyncrun
 from abc import ABC
+from os.path import splitext
+
+from asyncrun import asyncrun
 
 rclone_flags = '--fast-list'
 
@@ -144,7 +145,7 @@ class RcloneDirectory(RcloneItem):
 
 
 async def ls(drive, directory="", recursive_flat=False) -> [RcloneItem]:
-    if not directory.endswith('/'):
+    if not directory.endswith('/') and not directory == "":
         directory = directory + '/'
     src = drive + ":" + directory
     if recursive_flat:
@@ -163,7 +164,7 @@ async def ls(drive, directory="", recursive_flat=False) -> [RcloneItem]:
     return results
 
 
-async def tree(drive, directory) -> RcloneDirectory:
+async def tree(drive, directory: '') -> RcloneDirectory:
     def fill_path(path: RcloneDirectory, list: list):
         for item in list:
             if item.parent == path.path:

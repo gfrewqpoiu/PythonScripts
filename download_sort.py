@@ -9,8 +9,8 @@ home = os.fsdecode(Path.home())
 downloadDir = home + "/Downloads/"
 documenttype = ("pdf", "pages", "numbers", "keynote", "xlsx", "xls", "doc", "docx", "ppt", "pptx", "odt", "odp",
                 "txt", "html", "md", "rtf", "conf", "json", "csv")
-picturetype = ("gif", "tiff", "jpg", "jpeg", "png")
-programtype = ("iso", "dmg", "app", "exe", "py", "jar", "swf")
+picturetype = ("gif", "tiff", "jpg", "jpeg", "png", "xcf")
+programtype = ("iso", "dmg", "app", "exe", "py", "jar", "swf", "apk")
 archivetype = ("zip", "7z", "rar", "gz", "tar", "xz", "webarchive")
 videotype = ("mp4", "m4v", "mov", "mkv", "flv")
 audiotype = ("aac", "mp3", "aax", "m4a", "m4b", "wma", "flac", "wav")
