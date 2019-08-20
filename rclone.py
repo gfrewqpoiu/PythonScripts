@@ -113,7 +113,7 @@ class RcloneDirectory(RcloneItem):
     def __init__(self, item, drive, path, parent=None):
         super().__init__(item, drive, path, parent)
         self.is_directory = True
-        if not self.path.endswith("/"):
+        if (not self.path.endswith("/")) and self.path != "":
             self.path += "/"
         self.populated = False
         self._contents = []
@@ -165,7 +165,7 @@ async def ls(drive, directory="", recursive_flat=False) -> [RcloneItem]:
 
 
 async def tree(drive, directory="") -> RcloneDirectory:
-    def fill_path(path: RcloneDirectory, list: list):
+    async def fill_path(path: RcloneDirectory, list: list):
         for item in list:
             if item.parent == path.path:
                 path._contents.append(item)
@@ -179,13 +179,15 @@ async def tree(drive, directory="") -> RcloneDirectory:
         name = ""
     item = {'Path': directory, 'Name': os.path.basename(name), 'IsDir': True}
     root = RcloneDirectory(item, drive, "")
+    if directory == "":
+        root.parent = "{ROOTDIR}"
     fulltree = await flatls(drive, directory)
     tree = []
     tree.append(root)
     fulltree.append(root)
     for item in fulltree:
         if isinstance(item, RcloneDirectory):
-            fill_path(item, fulltree)
+            await fill_path(item, fulltree)
     return tree[0]
 
 
