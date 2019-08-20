@@ -1,9 +1,11 @@
 import asyncio.queues
 import logging
 import os
+
+import aiofiles.os as asyncos
+
 import rclone
 import video_convert
-import aiofiles.os as asyncos
 
 temppath = os.getcwd() + "/tmp/"
 basepath = "Videos/"
@@ -51,8 +53,8 @@ class Job():
     async def cleanup(self):
         await asyncos.remove(self.path)
         await asyncos.remove(self.newfilepath)
-        if self.oldext not in ['.mkv', '.mov']:
-            await rclone.delete_file(self.inputfile.fullpath)
+        # if self.oldext not in ['.mkv', '.mov']:
+        # await rclone.delete_file(self.inputfile.fullpath)
 
     async def run(self):
         await self.download()
