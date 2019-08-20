@@ -2,3 +2,6 @@
 -e git+https://github.com/Tinche/aiofiles.git@145107595fe72b877005fb4ebf9d77ffb754689a#egg=aiofiles
 appscript==1.1.0 ; sys_platform == 'darwin'
 peewee==3.10.0
+pyside2==5.13.0
+pysimpleguiqt==0.26.0
+shiboken2==5.13.0

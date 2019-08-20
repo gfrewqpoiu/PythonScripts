@@ -137,3 +137,21 @@ tmp/
 db.sqlite
 db.sqlite-shm
 db.sqlite-wal
+/.autoxsh
+Würde .autoxsh löschen
+Würde src/aiofiles/.gitignore löschen
+Würde src/aiofiles/.travis.yml löschen
+Würde src/aiofiles/LICENSE löschen
+Würde src/aiofiles/MANIFEST.in löschen
+Würde src/aiofiles/README.rst löschen
+Würde src/aiofiles/aiofiles/__init__.py löschen
+Würde src/aiofiles/aiofiles/base.py löschen
+Würde src/aiofiles/aiofiles/os.py löschen
+Würde src/aiofiles/aiofiles/threadpool/__init__.py löschen
+Würde src/aiofiles/aiofiles/threadpool/binary.py löschen
+Würde src/aiofiles/aiofiles/threadpool/text.py löschen
+Würde src/aiofiles/aiofiles/threadpool/utils.py löschen
+Würde src/aiofiles/setup.py löschen
+Würde src/aiofiles/test_requirements.txt löschen
+Würde src/aiofiles/tests/ löschen
+Würde src/aiofiles/tox.ini löschen

@@ -55,6 +55,43 @@ def getErrorWindow(text="Error"):
 def getPopup(text: str):
     sg.Popup(text)
 
+
+def rclonewindow():
+    layout = [[sg.Text("What is the Drive you want to access?")],
+              [sg.Input("Drive")],
+              [sg.Text("What is the folder you want to see?")],
+              [sg.Input()],
+              [sg.Cancel(), sg.OK()]]
+    window = sg.Window("rclone", layout=layout)
+    event, values = window.Read()
+    window.Close()
+    return event, values
+
+
+def rcloneoutputwindow(contents: []):
+    output = ""
+    for item in contents:
+        output += item.name + "\n"
+    layout = [[sg.Text("Here are the contents:")],
+              [sg.MultilineOutput(output)],
+              [sg.OK()]]
+    window = sg.Window("Results", layout)
+    window.Read()
+    window.Close()
+
+
+def sortoutputwindow(contents: [str]):
+    output = ""
+    for item in contents:
+        output += item + "\n"
+    layout = [[sg.Text("I have sorted these files:")],
+              [sg.MultilineOutput(output)],
+              [sg.OK()]]
+    window = sg.Window("Results", layout)
+    window.Read()
+    window.Close()
+
+
 if __name__ == '__main__':
     pprint.pprint(home)
     pprint.pprint(getInputWindow())

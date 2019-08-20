@@ -1,11 +1,10 @@
 import asyncio
 import decimal
 import json
-import os.path
-import shlex
 from abc import ABC
-from os.path import splitext
+from pathlib import *
 
+import GUI
 from asyncrun import asyncrun
 
 rclone_flags = '--fast-list'
@@ -31,17 +30,15 @@ def split(list):
 class RcloneItem(ABC):
     """Represents the concept of an object on a rclone Drive.
     Both files and folders."""
-    def __init__(self, item, drive, path, parent=None):
+
+    def __init__(self, item, drive: str, path):
         self.drive = drive
-        self.path = path + item['Path']
-        self.fullpath = drive + ':' + self.path
+        self.path = PurePosixPath(path, item['Path'])
+        if not drive.endswith(':'):
+            drive += ':'
+        self.fullpath = PurePosixPath(drive, self.path)
         self.name = item['Name']
-        if parent is None:
-            self.parent = self.path.replace(self.name, "")
-            if self.parent.endswith("//"):
-                self.parent.replace("//", "/")
-        else:
-            self.parent = parent
+        self.parent = self.path.parent
         self.is_directory = False
         self._size = None
         self._hash = None
@@ -81,10 +78,12 @@ class RcloneItem(ABC):
 
 class RcloneFile(RcloneItem):
     """Represents a file on a Rclone Drive"""
-    def __init__(self, item, drive, path, parent=None):
-        super().__init__(item, drive, path, parent)
+
+    def __init__(self, item, drive, path):
+        super().__init__(item, drive, path)
         self.filetype = item['MimeType']
-        self.purename, self.extension = splitext(self.path)
+        self.purename = self.path.stem
+        self.extension = self.path.suffix
         if int(item["Size"]) > 0:
             self._size = item['Size']
         else:
@@ -94,7 +93,7 @@ class RcloneFile(RcloneItem):
         return self._size
 
     def get_hash(self):
-        if self._hash == None:
+        if self._hash is None:
             self._hash = fetch_hash(self.fullpath)
         return self._hash
 
@@ -108,15 +107,16 @@ class RcloneFile(RcloneItem):
         else:
             return False
 
+
 class RcloneDirectory(RcloneItem):
     """Represents a folder on a rclone Drive"""
-    def __init__(self, item, drive, path, parent=None):
-        super().__init__(item, drive, path, parent)
+
+    def __init__(self, item, drive, path):
+        super().__init__(item, drive, path)
         self.is_directory = True
-        if not self.path.endswith("/"):
-            self.path += "/"
         self.populated = False
         self._contents = []
+        self._amount = -1
 
     async def populate(self):
         self._contents = await ls(self.drive, self.path)
@@ -144,55 +144,60 @@ class RcloneDirectory(RcloneItem):
         return self._amount
 
 
-async def ls(drive, directory="", recursive_flat=False) -> [RcloneItem]:
-    if (not directory.endswith('/')) and (not directory == ""):
-        directory = directory + '/'
-    src = drive + ":" + directory
+async def ls(drive: str, directory, recursive_flat=False) -> [RcloneItem]:
+    if not isinstance(directory, PurePosixPath):
+        directory = PurePosixPath(directory)
+    if not drive.endswith(':'):
+        drive += ':'
+    src = PurePosixPath(drive, directory)
     if recursive_flat:
-        res = await asyncrun('rclone', 'lsjson', src, rclone_flags, "-R")
+        res = await asyncrun('rclone', 'lsjson', str(src), rclone_flags, "-R")
     else:
-        res = await asyncrun('rclone', 'lsjson', src, rclone_flags)
+        res = await asyncrun('rclone', 'lsjson', str(src), rclone_flags)
     result = decode(res)
     results = []
     for item in result:
         if not item['IsDir']:
             results.append(RcloneFile(item, drive, directory))
         else:
-            dir = RcloneDirectory(item, drive, directory)
-            results.append(dir)
+            new_directory = RcloneDirectory(item, drive, directory)
+            results.append(new_directory)
 
     return results
 
 
-async def tree(drive, directory="") -> RcloneDirectory:
-    def fill_path(path: RcloneDirectory, list: list):
-        for item in list:
+async def tree(drive, directory) -> RcloneDirectory:
+    if not isinstance(directory, PurePosixPath):
+        directory = PurePosixPath(directory)
+
+    async def fill_path(path: RcloneDirectory, items: list):
+        for item in items:
             if item.parent == path.path:
                 path._contents.append(item)
 
         path.populated = True
 
-    if directory != "":
-        directory = shlex.quote(directory)
-        name = os.path.dirname(directory)
-    else:
-        name = ""
-    item = {'Path': directory, 'Name': os.path.basename(name), 'IsDir': True}
+    item = {'Path': directory, 'Name': directory.name, 'IsDir': True}
     root = RcloneDirectory(item, drive, "")
+    if directory == "":
+        root.parent = "{ROOTDIR}"
     fulltree = await flatls(drive, directory)
-    tree = []
-    tree.append(root)
     fulltree.append(root)
     for item in fulltree:
         if isinstance(item, RcloneDirectory):
-            fill_path(item, fulltree)
-    return tree[0]
+            await fill_path(item, fulltree)
+    return root
 
 
-async def flatls(drive, directory) -> [RcloneItem]:
+async def flatls(drive: str, directory: str or PurePosixPath) -> [RcloneItem]:
+    if not isinstance(directory, str):
+        directory = str(directory)
     return await ls(drive, directory, recursive_flat=True)
 
-async def size(full_path: str):
+
+async def size(full_path: str or PurePosixPath):
+    if not isinstance(full_path, str):
+        full_path = str(full_path)
     result = await asyncrun('rclone', 'size', full_path, '--json', rclone_flags)
     results = decode(result)
     amount = results['count']
@@ -200,35 +205,42 @@ async def size(full_path: str):
     return amount, size
 
 
-async def fetch_hash(full_path: str):
+async def fetch_hash(full_path: str or PurePosixPath):
+    if not isinstance(full_path, str):
+        full_path = str(full_path)
     res = await asyncrun('rclone', 'md5sum', full_path, rclone_flags)
     return res
 
 
-async def copy(src_full_path: str, dest_full_path: str):
+async def copy(src_full_path: PurePosixPath, dest_full_path: PurePosixPath):
+    if (not isinstance(src_full_path, str)) or (not isinstance(dest_full_path, str)):
+        src_full_path = str(src_full_path)
+        dest_full_path = str(dest_full_path)
     await asyncrun('rclone', 'copy', src_full_path, dest_full_path, '-c', rclone_flags)
 
-async def move(src_full_path: str, dest_full_path: str):
+
+async def move(src_full_path: str or PurePosixPath, dest_full_path: str or PurePosixPath):
+    if (not isinstance(src_full_path, str)) or (not isinstance(dest_full_path, str)):
+        src_full_path = str(src_full_path)
+        dest_full_path = str(dest_full_path)
     await asyncrun('rclone', 'move', src_full_path, dest_full_path, '-c', rclone_flags)
 
 
-async def delete_file(full_path):
+async def delete_file(full_path: str or PurePosixPath):
     await asyncrun('rclone', 'deletefile', full_path, rclone_flags, '--drive-use-trash=true')
 
 
+async def sync(src_full_path: str or PurePosixPath, dest_full_path: str or PurePosixPath, *args):
+    await asyncrun('rclone', 'sync', src_full_path, dest_full_path, '-c', rclone_flags, *args)
+
+
 async def main():
-    tree = await(ls('Drive', ''))
-    print("Files:")
-    for item in tree:
-        if isinstance(item, RcloneFile):
-            print(item.name)
-            print(await item.get_size_str())
-    print("Folders:")
-    for item in tree:
-        if isinstance(item, RcloneDirectory):
-            print(item.name)
-            if item.name == "Canary Mail":
-                print(await item.get_amount())
+    event, values = GUI.rclonewindow()
+    if event == 'OK':
+        drive = values[0]
+        path = values[1]
+        contents = await ls(drive, path)
+        GUI.rcloneoutputwindow(contents)
 
 
 if __name__ == '__main__':

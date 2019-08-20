@@ -1,12 +1,11 @@
 import asyncio
-import os
 import sys
 from pathlib import Path
 
 import aiofiles.os as asyncos
 
-home = os.fsdecode(Path.home())
-downloadDir = home + "/Downloads/"
+home = Path.home()
+downloadDir = Path(home, "Downloads/")
 documenttype = ("pdf", "pages", "numbers", "keynote", "xlsx", "xls", "doc", "docx", "ppt", "pptx", "odt", "odp",
                 "txt", "html", "md", "rtf", "conf", "json", "csv")
 picturetype = ("gif", "tiff", "jpg", "jpeg", "png", "xcf")
@@ -16,28 +15,26 @@ videotype = ("mp4", "m4v", "mov", "mkv", "flv")
 audiotype = ("aac", "mp3", "aax", "m4a", "m4b", "wma", "flac", "wav")
 
 
-async def makedir(dir, name: str):
-    try:
-        os.mkdir(os.fsdecode(dir) + name)
-    except FileExistsError:
-        pass
+async def makedir(directory: Path, name: str):
+    newpath = Path(directory, name)
+    if not newpath.exists():
+        asyncos.mkdir(newpath)
+    return newpath
 
 
-async def all_files(path):
+async def all_files(path: Path) -> [Path]:
     files = []
-    with os.scandir(path) as it:
-        for item in it:
-            if not item.name.startswith('.'):
-                if item.is_file():
-                    files.append(item)
-                elif item.is_dir():
-                    subfiles = await all_files(item)
-                    for subfile in subfiles:
-                        files.append(subfile)
+    for item in path.iterdir():
+        if not item.name.startswith('.'):
+            if item.is_file():
+                files.append(item)
+            elif item.is_dir():
+                subfiles = await all_files(item)
+                files += subfiles
     return files
 
 
-async def splitup(files):
+async def splitup(files: [Path]):
     documents = []
     pictures = []
     programs = []
@@ -45,84 +42,91 @@ async def splitup(files):
     videos = []
     audios = []
     for file in files:
-        name = file.name.lower()
-        if name.endswith(documenttype):
+        ext = file.suffix.strip('.')
+        if ext in documenttype:
             documents.append(file)
-        elif name.endswith(picturetype):
+        elif ext in picturetype:
             pictures.append(file)
-        elif name.endswith(programtype):
+        elif ext in programtype:
             programs.append(file)
-        elif name.endswith(archivetype):
+        elif ext in archivetype:
             archives.append(file)
-        elif name.endswith(videotype):
+        elif ext in videotype:
             videos.append(file)
-        elif name.endswith(audiotype):
+        elif ext in audiotype:
             audios.append(file)
     return documents, pictures, programs, archives, videos, audios
 
 
-async def movefile(file, dest):
-    try:
-        await asyncos.rename(file, dest)
-    except FileExistsError:
-        pass
+async def movefile(file: Path, dest: Path):
+    if file.parent != dest:
+        dest = Path(dest, file.name)
+        try:
+            await asyncos.rename(file, dest)
+        except FileExistsError:
+            pass
 
 
-async def maybemovefile(file, dest):
-    if not os.fsdecode(file).startswith(dest):
-        await movefile(file, dest + file.name)
-
-
-async def sort(dir):
+async def sort(dir: Path):
     files = await all_files(dir)
     docs, pics, progs, archs, vids, auds = await splitup(files)
     if docs:
-        await makedir(dir, "Dokumente")
-        docdir = os.fsdecode(dir) + "Dokumente/"
+        docdir = await makedir(dir, "Dokumente")
         for doc in docs:
-            await maybemovefile(doc, docdir)
+            await movefile(doc, docdir)
     if pics:
-        await makedir(dir, "Bilder")
-        picdir = os.fsdecode(dir) + "Bilder/"
+        picdir = await makedir(dir, "Bilder")
         for pic in pics:
-            await maybemovefile(pic, picdir)
+            await movefile(pic, picdir)
     if progs:
-        await makedir(dir, "Programme")
-        progdir = os.fsdecode(dir) + "Programme/"
+        progdir = await makedir(dir, "Programme")
         for prog in progs:
-            await maybemovefile(prog, progdir)
+            await movefile(prog, progdir)
     if archs:
-        await makedir(dir, "Archive")
-        archdir = os.fsdecode(dir) + "Archive/"
+        archdir = await makedir(dir, "Archive")
         for arch in archs:
-            await maybemovefile(arch, archdir)
+            await movefile(arch, archdir)
     if vids:
-        await makedir(dir, "Videos")
-        viddir = os.fsdecode(dir) + "Videos/"
+        viddir = await makedir(dir, "Videos")
         for vid in vids:
-            await maybemovefile(vid, viddir)
+            await movefile(vid, viddir)
     if auds:
-        await makedir(dir, "Audios")
-        auddir = os.fsdecode(dir) + "Audios/"
+        auddir = await makedir(dir, "Audios")
         for aud in auds:
-            await maybemovefile(aud, auddir)
+            await movefile(aud, auddir)
 
 
-async def main(dir=downloadDir):
-    if not dir.endswith("/"):
-        dir += "/"
-    await sort(dir)
+async def cleanup(directory: Path):
+    for item in directory.iterdir():
+        if item.is_dir():
+            await cleanup(item)
+            try:
+                item.rmdir()
+            except OSError:
+                pass
+
+
+async def main(directory=downloadDir):
+    directory = Path(directory)
+    await sort(directory)
+    await cleanup(directory)
+
+
+def display_results():
+    GUI.getPopup("Finished sorting the given Folder.")
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         import GUI
 
-        event, values = GUI.getFolderInputWindow(initial_folder=downloadDir)
+        event, values = GUI.getFolderInputWindow(initial_folder=str(downloadDir.absolute()))
         if event == "OK" and values[0] != "":
             asyncio.run(main(values[0]))
+            display_results()
         elif event == "OK":
             asyncio.run(main())
+            display_results()
         else:
             GUI.getErrorWindow("You must provide a folder to sort")
             sys.exit(1)
@@ -130,3 +134,4 @@ if __name__ == "__main__":
         asyncio.run(main(sys.argv[1]))
     else:
         print("Usage: download_sort.py DIRECTORY_TO_SORT")
+        sys.exit(1)

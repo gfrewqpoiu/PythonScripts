@@ -1,14 +1,14 @@
 import asyncio.queues
 import logging
-import os
+from pathlib import *
 
 import aiofiles.os as asyncos
 
 import rclone
 import video_convert
 
-temppath = os.getcwd() + "/tmp/"
-basepath = "Videos/"
+temppath = Path(Path.cwd(), 'tmp')
+basepath = PurePosixPath("Videos/")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -23,14 +23,13 @@ class Job():
         self.is_converted = False
         self.is_uploaded = False
         self.inputfile = inputfile
-        self.path = self._temppath + self.inputfile.name
-        self.newfilepath, self.oldext = os.path.splitext(self.path)
-        self.newfilepath += self.newext
-        self.parentpath = self.inputfile.fullpath.replace(self.inputfile.name, "")
-        self.newname, self.oldext = os.path.splitext(self.inputfile.name)
-        self.newname += self.newext
+        self.path = Path(self._temppath, self.inputfile.name)
+        self.newfilepath = self.path.with_suffix('.mp4')
+        self.parentpath = self.inputfile.fullpath.parent
+        self.newname = self.inputfile.purename
+        self.newname += '.mp4'
         self.log.debug("New Job created with:")
-        self.log.debug("Inputtfile: " + inputfile.path)
+        self.log.debug("Inputtfile: " + str(inputfile.path))
 
     async def download(self):
         await rclone.copy(self.inputfile.fullpath, self._temppath)
@@ -78,7 +77,7 @@ async def check_already_converted(file: rclone.RcloneFile, contents: [rclone.Rcl
     :param file The file to check
     :param contents A list of contents.
     :returns True or false"""
-    filename, ext = os.path.splitext(file.name)
+    filename = file.purename
     for item in contents:
         if filename + '.mp4' == item.name:
             return True
@@ -87,8 +86,8 @@ async def check_already_converted(file: rclone.RcloneFile, contents: [rclone.Rcl
 
 async def check_to_convert(file: rclone.RcloneFile, contents: [rclone.RcloneItem]) -> bool:
     """Checks if the given file needs to be converted."""
-    type = str(file.filetype)  # Finally
-    if type.startswith('video'):
+    filetype = str(file.filetype)  # Finally
+    if filetype.startswith('video'):
         if type != 'video/mp4':
             already_there = await check_already_converted(file, contents)
             if not already_there:
