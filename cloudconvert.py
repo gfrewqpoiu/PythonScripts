@@ -1,5 +1,8 @@
 import asyncio.queues
 import logging
+import pickle
+import pickletools
+import pprint
 from pathlib import *
 
 import aiofiles.os as asyncos
@@ -9,9 +12,9 @@ import video_convert
 
 temppath = Path(Path.cwd(), 'tmp')
 basepath = PurePosixPath("Videos/")
-
+print = pprint.pprint
 logging.basicConfig(level=logging.INFO)
-
+queue = asyncio.Queue()
 
 class Job():
     _temppath = temppath
@@ -61,6 +64,9 @@ class Job():
         await self.upload()
         await self.cleanup()
 
+    def __str__(self):
+        return f"{self.inputfile.purename}: Downloaded: {self.is_downloaded}, Converted: {self.is_converted}, Uploaded: {self.is_uploaded}"
+
 
 async def get_path_content(drive, path) -> [rclone.RcloneItem]:
     content = await rclone.ls(drive, path)
@@ -88,7 +94,7 @@ async def check_to_convert(file: rclone.RcloneFile, contents: [rclone.RcloneItem
     """Checks if the given file needs to be converted."""
     filetype = str(file.filetype)  # Finally
     if filetype.startswith('video'):
-        if type != 'video/mp4':
+        if (type != 'video/mp4') and (file.extension not in [".mp4", ".m4v"]):
             already_there = await check_already_converted(file, contents)
             if not already_there:
                 return True
@@ -105,8 +111,20 @@ async def worker(queue: asyncio.Queue):
         queue.task_done()
 
 
+async def send_jobs(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
+    global queue
+    addr = writer.get_extra_info('peername')
+    print(f"Got connection from {addr}")
+    pickledqueue = pickletools.optimize(pickle.dumps(queue._queue, protocol=4))
+    writer.write(pickledqueue)
+    await writer.drain()
+    writer.close()
+
+
 async def main(drive, path=basepath):
+    global queue
     async def search(folder: rclone.RcloneDirectory):
+        global queue
         contents = await folder.get_contents()
         for item in contents:
             if isinstance(item, rclone.RcloneDirectory):
@@ -117,13 +135,16 @@ async def main(drive, path=basepath):
                     job = Job(inputfile=item)
                     await queue.put(job)
 
-    queue = asyncio.Queue()
     log = logging.getLogger()
     root = await rclone.tree(drive, path)
     task = asyncio.create_task(worker(queue))
     await search(root)
     log.info(f"Found {queue.qsize()} items to convert")
+    server = await asyncio.start_server(send_jobs, '0.0.0.0', 8888)
+    await server.start_serving()
+    print("Now accepting connections!")
     await queue.join()
+    await server.close()
     task.cancel()
     log.info("Done with all the conversions!")
 
