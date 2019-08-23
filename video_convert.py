@@ -1,10 +1,15 @@
 import asyncio
+import pathlib
 import sys
 
 from asyncrun import asyncrun_quiet
 
 
 async def convert(input, output, preset='Fast 1080p30', quality="22.0", speed="slow"):
+    if isinstance(input, pathlib.Path):
+        input = str(input)
+    if isinstance(output, pathlib.Path):
+        output = str(output)
     await asyncrun_quiet('HandBrakeCLI', '-i', input, '-o', output, '-O',
                    '-Z', preset, '--quality', quality, '--encoder-preset', speed)
 
