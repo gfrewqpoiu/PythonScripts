@@ -3,20 +3,19 @@ import decimal
 import json
 from abc import ABC
 from pathlib import *
-
-import GUI
 from asyncrun import asyncrun
+from typing import Union
 
 rclone_flags = '--fast-list'
 
 
-def decode(input):
+def decode(input: str):
     if input is None:
         return
     return json.loads(input)
 
 
-def split(list):
+def split(list: list):
     files = []
     folders = []
     for item in list:
@@ -47,7 +46,7 @@ class RcloneItem(ABC):
         return self.name
 
     async def get_size(self):
-        pass
+        raise NotImplementedError
 
     async def get_size_str(self):
         size = decimal.Decimal(await self.get_size())
@@ -144,7 +143,7 @@ class RcloneDirectory(RcloneItem):
         return self._amount
 
 
-async def ls(drive: str, directory, recursive_flat=False) -> [RcloneItem]:
+async def ls(drive: str, directory: Union[str, PurePosixPath], recursive_flat: bool = False) -> [RcloneItem]:
     if not isinstance(directory, PurePosixPath):
         directory = PurePosixPath(directory)
     if not drive.endswith(':'):
@@ -166,7 +165,7 @@ async def ls(drive: str, directory, recursive_flat=False) -> [RcloneItem]:
     return results
 
 
-async def tree(drive, directory) -> RcloneDirectory:
+async def tree(drive: str, directory: Union[str, PurePosixPath]) -> RcloneDirectory:
     if not isinstance(directory, PurePosixPath):
         directory = PurePosixPath(directory)
 
@@ -189,15 +188,11 @@ async def tree(drive, directory) -> RcloneDirectory:
     return root
 
 
-async def flatls(drive: str, directory: str or PurePosixPath) -> [RcloneItem]:
-    if not isinstance(directory, str):
-        directory = str(directory)
+async def flatls(drive: str, directory: Union[str, PurePosixPath]) -> [RcloneItem]:
     return await ls(drive, directory, recursive_flat=True)
 
 
-async def size(full_path: str or PurePosixPath):
-    if not isinstance(full_path, str):
-        full_path = str(full_path)
+async def size(full_path: Union[str, PurePosixPath]):
     result = await asyncrun('rclone', 'size', full_path, '--json', rclone_flags)
     results = decode(result)
     amount = results['count']
@@ -235,6 +230,7 @@ async def sync(src_full_path: str or PurePosixPath, dest_full_path: str or PureP
 
 
 async def main():
+    import GUI
     event, values = GUI.rclonewindow()
     if event == 'OK':
         drive = values[0]

@@ -3,13 +3,12 @@ import logging
 import pickle
 import pickletools
 import pprint
+import rclone
+import video_convert
+import aiofiles.os as asyncos
 from collections import deque
 from pathlib import *
 
-import aiofiles.os as asyncos
-
-import rclone
-import video_convert
 
 temppath = Path(Path.cwd(), 'tmp')
 basepath = PurePosixPath("Videos/")
@@ -122,6 +121,7 @@ async def create_server():
     async with server:
         await server.serve_forever()
 
+
 async def send_jobs(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     addr = writer.get_extra_info('peername')
     print(f"Got connection from {addr}")
@@ -136,6 +136,7 @@ async def send_jobs(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
 async def main(drive, path=basepath):
     loop = asyncio.get_event_loop()
     global queue
+
     async def search(folder: rclone.RcloneDirectory):
         global queue
         contents = await folder.get_contents()

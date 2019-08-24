@@ -7,7 +7,7 @@ import aiofiles.os as asyncos
 home = Path.home()
 downloadDir = Path(home, "Downloads/")
 documenttype = ("pdf", "pages", "numbers", "keynote", "xlsx", "xls", "doc", "docx", "ppt", "pptx", "odt", "odp",
-                "txt", "html", "md", "rtf", "conf", "json", "csv")
+                "txt", "html", "md", "rtf", "conf", "json", "csv", "rtfd")
 picturetype = ("gif", "tiff", "jpg", "jpeg", "png", "xcf")
 programtype = ("iso", "dmg", "app", "exe", "py", "jar", "swf", "apk")
 archivetype = ("zip", "7z", "rar", "gz", "tar", "xz", "webarchive")

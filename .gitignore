@@ -155,3 +155,5 @@ Würde src/aiofiles/setup.py löschen
 Würde src/aiofiles/test_requirements.txt löschen
 Würde src/aiofiles/tests/ löschen
 Würde src/aiofiles/tox.ini löschen
+
+src/

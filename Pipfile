@@ -6,12 +6,17 @@ verify_ssl = true
 [dev-packages]
 jupyter = "*"
 pyinstaller = "*"
+aioconsole = "*"
 
 [packages]
 aiofiles = {editable = true,git = "https://github.com/Tinche/aiofiles.git"}
 appscript = {version = "*",sys_platform = "== 'darwin'"}
 peewee = "*"
 pyside2 = "*"
+aiohttp = "*"
+beautifulsoup4 = "*"
+lxml = "*"
+html5lib = "*"
 
 [requires]
 python_version = "3.7"
