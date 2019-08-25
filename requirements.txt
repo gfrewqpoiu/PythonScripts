@@ -1,7 +1,21 @@
 -i https://pypi.org/simple
 -e git+https://github.com/Tinche/aiofiles.git@145107595fe72b877005fb4ebf9d77ffb754689a#egg=aiofiles
+aiohttp==3.5.4
+aiojobs==0.2.2
 appscript==1.1.0 ; sys_platform == 'darwin'
+async-timeout==3.0.1
+attrs==19.1.0
+beautifulsoup4==4.8.0
+chardet==3.0.4
+html5lib==1.0.1
+idna==2.8
+lxml==4.4.1
+multidict==4.5.2
 peewee==3.10.0
 pyside2==5.13.0
 pysimpleguiqt==0.26.0
 shiboken2==5.13.0
+six==1.12.0
+soupsieve==1.9.3
+webencodings==0.5.1
+yarl==1.3.0

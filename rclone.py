@@ -1,13 +1,15 @@
 import asyncio
 import decimal
 import json
+import aiojobs
 from abc import ABC
 from pathlib import *
 from asyncrun import asyncrun
-from typing import Union
+from typing import Union, Tuple
 
 rclone_flags = '--fast-list'
 
+loop = asyncio.get_event_loop()
 
 def decode(input: str):
     if input is None:
@@ -15,7 +17,7 @@ def decode(input: str):
     return json.loads(input)
 
 
-def split(list: list):
+def split(list: list) -> Tuple[list, list]:
     files = []
     folders = []
     for item in list:
@@ -45,10 +47,10 @@ class RcloneItem(ABC):
     def __str__(self):
         return self.name
 
-    async def get_size(self):
+    async def get_size(self) -> int:
         raise NotImplementedError
 
-    async def get_size_str(self):
+    async def get_size_str(self) -> str:
         size = decimal.Decimal(await self.get_size())
         if size > 1024:
             size = size / 1024 #KB
@@ -84,28 +86,42 @@ class RcloneFile(RcloneItem):
         self.purename = self.path.stem
         self.extension = self.path.suffix
         if int(item["Size"]) > 0:
-            self._size = item['Size']
+            self._size = int(item['Size'])
         else:
             self._size = 0
 
-    async def get_size(self):
+    async def get_size(self) -> int:
         return self._size
 
-    def get_hash(self):
+    async def get_hash(self) -> str:
         if self._hash is None:
-            self._hash = fetch_hash(self.fullpath)
+            self._hash = await fetch_hash(self.fullpath)
+            self._hash = self._hash.split()[0]
         return self._hash
 
-    def __eq__(self, other):
+    async def equals(self, other):
+        """Checks if the given Files are equal."""
         if not isinstance(other, RcloneFile):
             return False
-        hash1 = self.get_hash()
-        hash2 = other.get_hash()
-        if (hash1 == hash2) and (self.get_size() == other.get_size()):
+        hash1 = await self.get_hash()
+        hash2 = await other.get_hash()
+        if (hash1 == hash2) and (await self.get_size() == await other.get_size()):
             return True
         else:
             return False
 
+    def __eq__(self, other) -> bool:
+        """This only works when the files have their hashes pre-filled by calling the coroutine get_hash."""
+        if not isinstance(other, RcloneFile):
+            return False
+        if self._hash is None or other._hash is None:
+            raise EnvironmentError("""The hashes of the two files must be pre-filled by calling the coroutine get_hash.
+            You can also use the equals coroutine.""")
+        else:
+            if (self._hash == other._hash) and (self._size == other._size):
+                return True
+            else:
+                return False
 
 class RcloneDirectory(RcloneItem):
     """Represents a folder on a rclone Drive"""
@@ -121,7 +137,7 @@ class RcloneDirectory(RcloneItem):
         self._contents = await ls(self.drive, self.path)
         self.populated = True
 
-    async def get_contents(self, recursive = False):
+    async def get_contents(self, recursive: bool = False) -> [RcloneItem]:
         if not self.populated:
             await self.populate()
         if recursive:
@@ -141,6 +157,13 @@ class RcloneDirectory(RcloneItem):
         if self._size is None:
             await self.get_size()
         return self._amount
+
+    async def find(self, search: str):
+        search = search.lower()
+        for item in await self.get_contents():
+            if search in item.name.lower():
+                return item
+        return None
 
 
 async def ls(drive: str, directory: Union[str, PurePosixPath], recursive_flat: bool = False) -> [RcloneItem]:
@@ -165,7 +188,7 @@ async def ls(drive: str, directory: Union[str, PurePosixPath], recursive_flat: b
     return results
 
 
-async def tree(drive: str, directory: Union[str, PurePosixPath]) -> RcloneDirectory:
+async def tree(drive: str = "Drive", directory: Union[str, PurePosixPath] = "") -> RcloneDirectory:
     if not isinstance(directory, PurePosixPath):
         directory = PurePosixPath(directory)
 

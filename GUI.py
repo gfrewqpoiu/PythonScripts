@@ -1,5 +1,6 @@
 import os
 import pprint
+from rclone import RcloneItem
 from pathlib import Path
 
 import PySimpleGUIQt as sg
@@ -68,12 +69,9 @@ def rclonewindow():
     return event, values
 
 
-def rcloneoutputwindow(contents: []):
-    output = ""
-    for item in contents:
-        output += item.name + "\n"
+def rcloneoutputwindow(contents: [RcloneItem]):
     layout = [[sg.Text("Here are the contents:")],
-              [sg.MultilineOutput(output)],
+              [sg.Listbox(contents)],
               [sg.OK()]]
     window = sg.Window("Results", layout)
     window.Read()

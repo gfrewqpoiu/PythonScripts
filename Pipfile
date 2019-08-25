@@ -17,6 +17,8 @@ aiohttp = "*"
 beautifulsoup4 = "*"
 lxml = "*"
 html5lib = "*"
+aiojobs = "*"
+pysimpleguiweb = {editable = true,version = "*"}
 
 [requires]
 python_version = "3.7"

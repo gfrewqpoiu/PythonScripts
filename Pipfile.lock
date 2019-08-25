@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9098b86fe49e2ef2acc2ace61d6702ab08b7d80ec872ba94926480d7a8436782"
+            "sha256": "98d71153da73c652bdb57928a726ef205bfc3e5aa5680883926b1314f84412c1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -48,6 +48,14 @@
             ],
             "index": "pypi",
             "version": "==3.5.4"
+        },
+        "aiojobs": {
+            "hashes": [
+                "sha256:8e4b3e3d1bdb970bdaf8f8cd5eb4e4ff3e0e01a4abd22b4f73a87002a5ae4005",
+                "sha256:bf93b4a8d5a3ade3f85b6edb6efd9703acf60a8c5492b9fc4a6df843dd8decb3"
+            ],
+            "index": "pypi",
+            "version": "==0.2.2"
         },
         "appscript": {
             "hashes": [
@@ -187,6 +195,21 @@
             ],
             "index": "pypi",
             "version": "==5.13.0"
+        },
+        "pysimpleguiweb": {
+            "hashes": [
+                "sha256:057e5db0c968c0dd79c336a2cf97127af40369c4d29eb5244dab59a40dc2446c",
+                "sha256:215222accdf67b86dbf075c92a74eb15227970448645b39d131c63801520018d"
+            ],
+            "index": "pypi",
+            "version": "==0.28.1"
+        },
+        "remi": {
+            "hashes": [
+                "sha256:ad87fafbefd5a8f3c34086a877828cceca3fc5be93703707baacc069dc39edd9",
+                "sha256:cd8eb2b972869bb5c2b5c0611fbddaa204a5356bef58169208ace7813186c4c4"
+            ],
+            "version": "==2019.4"
         },
         "shiboken2": {
             "hashes": [

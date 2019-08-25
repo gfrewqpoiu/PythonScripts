@@ -24,7 +24,7 @@ async def main():
     if PySimpleGUIQt.DebugWin.debug_window is not None:
         event, values = PySimpleGUIQt.DebugWin.debug_window.window.Read()
         if event == 'Quit':
-            PySimpleGUIQt.DebugWin.Close()
+            PySimpleGUIQt.DebugWin.Close(PySimpleGUIQt.DebugWin.debug_window)
 
 
 if __name__ == '__main__':
