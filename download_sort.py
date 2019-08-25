@@ -18,7 +18,7 @@ audiotype = ("aac", "mp3", "aax", "m4a", "m4b", "wma", "flac", "wav")
 async def makedir(directory: Path, name: str):
     newpath = Path(directory, name)
     if not newpath.exists():
-        asyncos.mkdir(newpath)
+        await asyncos.mkdir(newpath)
     return newpath
 
 
