@@ -2,14 +2,15 @@ import asyncio
 import decimal
 import json
 import aiojobs
-from abc import ABC
+import nest_asyncio
+from abc import ABC, abstractmethod
 from pathlib import *
 from asyncrun import asyncrun
 from typing import Union, Tuple
 
 rclone_flags = '--fast-list'
 
-loop = asyncio.get_event_loop()
+loop = None
 
 def decode(input: str):
     if input is None:
@@ -47,21 +48,22 @@ class RcloneItem(ABC):
     def __str__(self):
         return self.name
 
+    @abstractmethod
     async def get_size(self) -> int:
         raise NotImplementedError
 
     async def get_size_str(self) -> str:
         size = decimal.Decimal(await self.get_size())
         if size > 1024:
-            size = size / 1024 #KB
+            size = size / 1024  # KB
             if size > 1024:
-                size = size / 1024 #MB
+                size = size / 1024  # MB
                 if size > 1024:
-                    size = size / 1024 #GB
+                    size = size / 1024  # GB
                     if size > 1024:
-                        size = size / 1024 #TB
+                        size = size / 1024  # TB
                         if size > 1024:
-                            size = size / 1024 #PB
+                            size = size / 1024  # PB
                             return str(round(size, 3)) + " PBytes"
                         else:
                             return str(round(size, 3)) + " TBytes"
@@ -111,17 +113,24 @@ class RcloneFile(RcloneItem):
             return False
 
     def __eq__(self, other) -> bool:
-        """This only works when the files have their hashes pre-filled by calling the coroutine get_hash."""
+        """This only works properly when the files have their hashes pre-filled by calling the coroutine get_hash."""
         if not isinstance(other, RcloneFile):
             return False
+
         if self._hash is None or other._hash is None:
-            raise EnvironmentError("""The hashes of the two files must be pre-filled by calling the coroutine get_hash.
-            You can also use the equals coroutine.""")
+            if self._hash is None:
+                loop.run_until_complete(self.get_hash())
+            if other._hash is None:
+                loop.run_until_complete(other.get_hash())
+
+            print("This has blockingly called get_hash since one of these didn't have a hash specified."
+                  "Consider using the equals coroutine instead.")
+
+        if (self._hash == other._hash) and (self._size == other._size):
+            return True
         else:
-            if (self._hash == other._hash) and (self._size == other._size):
-                return True
-            else:
-                return False
+            return False
+
 
 class RcloneDirectory(RcloneItem):
     """Represents a folder on a rclone Drive"""
@@ -253,7 +262,10 @@ async def sync(src_full_path: str or PurePosixPath, dest_full_path: str or PureP
 
 
 async def main():
+    global loop
     import GUI
+    loop = asyncio.get_running_loop()
+    nest_asyncio.apply()
     event, values = GUI.rclonewindow()
     if event == 'OK':
         drive = values[0]

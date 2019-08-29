@@ -19,6 +19,7 @@ lxml = "*"
 html5lib = "*"
 aiojobs = "*"
 pysimpleguiweb = {editable = true,version = "*"}
+nest-asyncio = "*"
 
 [requires]
 python_version = "3.7"
