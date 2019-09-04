@@ -135,9 +135,9 @@ class RcloneDirectory(RcloneItem):
 
     def __init__(self, item, drive, path):
         super().__init__(item, drive, path)
-        self.is_directory = True
+        self.is_directory: bool = True
         self.populated: bool = False
-        self._contents: List[RcloneItem]
+        self._contents: List[RcloneItem] = []
         self._amount = -1
 
     async def populate(self):
