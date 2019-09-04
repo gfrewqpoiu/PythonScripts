@@ -1,8 +1,10 @@
 import asyncio
 import sys
+import GUI
 from pathlib import Path
+from typing import List, Union, Tuple
 
-import aiofiles.os as asyncos
+import aiofiles.os as asyncos  # type: ignore
 
 home = Path.home()
 downloadDir = Path(home, "Downloads/")
@@ -15,14 +17,14 @@ videotype = ("mp4", "m4v", "mov", "mkv", "flv")
 audiotype = ("aac", "mp3", "aax", "m4a", "m4b", "wma", "flac", "wav")
 
 
-async def makedir(directory: Path, name: str):
+async def makedir(directory: Path, name: str) -> Path:
     newpath = Path(directory, name)
     if not newpath.exists():
         await asyncos.mkdir(newpath)
     return newpath
 
 
-async def all_files(path: Path) -> [Path]:
+async def all_files(path: Path) -> List[Path]:
     files = []
     for item in path.iterdir():
         if not item.name.startswith('.'):
@@ -34,7 +36,11 @@ async def all_files(path: Path) -> [Path]:
     return files
 
 
-async def splitup(files: [Path]):
+async def splitup(files: List[Path]) -> Tuple[List[Path], List[Path], List[Path], List[Path], List[Path], List[Path]]:
+    """Splits the files based on the file extension.
+
+    :param files: A list of Paths(Files) to split up.
+    :returns A Tuple of Paths in the following order: Documents, Pictures, Programs, Archives, Videos, Audios"""
     documents = []
     pictures = []
     programs = []
@@ -58,13 +64,27 @@ async def splitup(files: [Path]):
     return documents, pictures, programs, archives, videos, audios
 
 
-async def movefile(file: Path, dest: Path):
+async def move_file(file: Path, dest: Path) -> None:
+    """Moves the file from its path to the new destination.
+
+    :param file: The file to move.
+    :param dest: The folder to move the file to."""
+    dest = dest.absolute()
     if file.parent != dest:
-        dest = Path(dest, file.name)
-        try:
-            await asyncos.rename(file, dest)
-        except FileExistsError:
-            pass
+        destination = Path(dest, file.name)
+        if not dest.exists():
+            await asyncos.rename(file, destination)
+        else:
+            await move_existing_file(file, destination)
+
+
+async def move_existing_file(file: Path, dest: Path, count: int = 1) -> None:
+    desti = dest.absolute()
+    destination = Path(desti.parent, desti.stem + '-' + str(count) + desti.suffix)
+    if not destination.exists():
+        await asyncos.rename(file, destination)
+    else:
+        await move_existing_file(file, dest, count=count+1)
 
 
 async def sort(dir: Path):
@@ -73,53 +93,52 @@ async def sort(dir: Path):
     if docs:
         docdir = await makedir(dir, "Dokumente")
         for doc in docs:
-            await movefile(doc, docdir)
+            await move_file(doc, docdir)
     if pics:
         picdir = await makedir(dir, "Bilder")
         for pic in pics:
-            await movefile(pic, picdir)
+            await move_file(pic, picdir)
     if progs:
         progdir = await makedir(dir, "Programme")
         for prog in progs:
-            await movefile(prog, progdir)
+            await move_file(prog, progdir)
     if archs:
         archdir = await makedir(dir, "Archive")
         for arch in archs:
-            await movefile(arch, archdir)
+            await move_file(arch, archdir)
     if vids:
         viddir = await makedir(dir, "Videos")
         for vid in vids:
-            await movefile(vid, viddir)
+            await move_file(vid, viddir)
     if auds:
         auddir = await makedir(dir, "Audios")
         for aud in auds:
-            await movefile(aud, auddir)
+            await move_file(aud, auddir)
 
 
-async def cleanup(directory: Path):
+async def cleanup(directory: Path) -> None:
     for item in directory.iterdir():
         if item.is_dir():
             await cleanup(item)
-            try:
+            try:  # Directory may be empty or we could be blocked from writing.
                 item.rmdir()
-            except OSError:
+            except OSError:  # Directory is not empty or blocked, so leave it.
                 pass
 
 
-async def main(directory=downloadDir):
-    directory = Path(directory)
+async def main(directory: Union[Path, str] = downloadDir) -> None:
+    if not isinstance(directory, Path):
+        directory = Path(directory)
     await sort(directory)
     await cleanup(directory)
 
 
 def display_results():
-    GUI.getPopup("Finished sorting the given Folder.")
+    GUI.getPopup("Finished sorting the given Folder.")  # TODO: Rewrite the module to actually display results.
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        import GUI
-
         event, values = GUI.getFolderInputWindow(initial_folder=str(downloadDir.absolute()))
         if event == "OK" and values[0] != "":
             asyncio.run(main(values[0]))

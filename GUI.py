@@ -2,8 +2,12 @@ import os
 import pprint
 from rclone import RcloneItem
 from pathlib import Path
-
-import PySimpleGUIQt as sg
+from typing import List
+import sys
+if sys.platform == "darwin":
+    import PySimpleGUIQt as sg  # type: ignore
+else:
+    import PySimpleGUI as sg  # type: ignore
 
 home = os.fsdecode(Path.home())
 
@@ -19,7 +23,7 @@ def getInputOutputWindow(titletext="Select File"):
     return event, values
 
 
-def getInputWindow(titletext="Inputfile"):
+def getInputWindow(titletext: str = "Input File"):
     layout = [[sg.Text("Select a file to convert:")],
               [sg.Input(), sg.FileBrowse("Select File", initial_folder=home)],
               [sg.OK(), sg.Cancel()]]
@@ -29,7 +33,7 @@ def getInputWindow(titletext="Inputfile"):
     return event, values
 
 
-def getFolderInputWindow(titletext="Inputfolder", initial_folder=home):
+def getFolderInputWindow(titletext: str = "Input Folder", initial_folder: str = home):
     layout = [[sg.Text("Select a folder:")],
               [sg.Input(), sg.FolderBrowse("Select Folder", initial_folder=initial_folder)],
               [sg.OK(), sg.Cancel()]]
@@ -39,7 +43,7 @@ def getFolderInputWindow(titletext="Inputfolder", initial_folder=home):
     return event, values
 
 
-def getOutputWindow(titletext="Outputfile", prefill=""):
+def getOutputWindow(titletext: str = "Output File", prefill: str = ""):
     layout = [[sg.Text("Where should it be saved?")],
               [sg.Text("Save under:"), sg.Input(), sg.FileSaveAs(initial_folder=prefill)],
               [sg.OK(), sg.Cancel()]]
@@ -49,7 +53,7 @@ def getOutputWindow(titletext="Outputfile", prefill=""):
     return event, values
 
 
-def getErrorWindow(text="Error"):
+def getErrorWindow(text: str = "Error"):
     sg.PopupError(text)
 
 
@@ -69,7 +73,7 @@ def rclonewindow():
     return event, values
 
 
-def rcloneoutputwindow(contents: [RcloneItem]):
+def rcloneoutputwindow(contents: List[RcloneItem]):
     layout = [[sg.Text("Here are the contents:")],
               [sg.Listbox(contents)],
               [sg.OK()]]
@@ -78,10 +82,8 @@ def rcloneoutputwindow(contents: [RcloneItem]):
     window.Close()
 
 
-def sortoutputwindow(contents: [str]):
-    output = ""
-    for item in contents:
-        output += item + "\n"
+def sortoutputwindow(contents: List[str]):
+    output = "\n".join(contents)
     layout = [[sg.Text("I have sorted these files:")],
               [sg.MultilineOutput(output)],
               [sg.OK()]]

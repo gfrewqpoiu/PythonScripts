@@ -7,19 +7,17 @@ verify_ssl = true
 jupyter = "*"
 pyinstaller = "*"
 aioconsole = "*"
+pylint = "*"
+mypy = "*"
 
 [packages]
-aiofiles = {editable = true,git = "https://github.com/Tinche/aiofiles.git"}
+aiofiles = {git = "https://github.com/Tinche/aiofiles.git"}
 appscript = {version = "*",sys_platform = "== 'darwin'"}
 peewee = "*"
-pyside2 = "*"
-aiohttp = "*"
-beautifulsoup4 = "*"
-lxml = "*"
-html5lib = "*"
-aiojobs = "*"
-pysimpleguiweb = {editable = true,version = "*"}
+pyside2 = {version = "*",sys_platform = "== 'darwin'"}
 nest-asyncio = "*"
+pysimplegui = "*"
+pysimpleguiqt = {version = "*",sys_platform = "== 'darwin'"}
 
 [requires]
 python_version = "3.7"
