@@ -1,6 +1,6 @@
-#Python Scripts
+Python Scripts
 
-In this repository, I have collected some small python scripts, that I wrote to help me achieve some tasks easier.
+In this repository, I have collected some small Python scripts, that I wrote to help me achieve some tasks easier.
 
 * Rclone.py is a small WIP wrapper around Rclone.
 * Video_convert is a small WIP wrapper around HandBrakeCLI.
