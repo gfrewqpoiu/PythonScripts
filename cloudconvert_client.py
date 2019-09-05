@@ -1,6 +1,6 @@
 import asyncio
 import pickle
-import PySimpleGUI as sg  # type: ignore
+import PySimpleGUIQt as sg  # type: ignore
 from cloudconvert import Job as Job
 from typing import Deque, Union, List
 import pprint

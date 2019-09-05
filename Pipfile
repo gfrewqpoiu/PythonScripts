@@ -18,6 +18,10 @@ pyside2 = {version = "*",sys_platform = "== 'darwin'"}
 nest-asyncio = "*"
 pysimplegui = "*"
 pysimpleguiqt = {version = "*",sys_platform = "== 'darwin'"}
+cchardet = "*"
+beautifulsoup4 = "*"
+lxml = "*"
+requests = {extras = ["security"],version = "*"}
 
 [requires]
 python_version = "3.7"
