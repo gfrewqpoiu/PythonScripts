@@ -22,6 +22,8 @@ cchardet = "*"
 beautifulsoup4 = "*"
 lxml = "*"
 requests = {extras = ["security"],version = "*"}
+rumps = {version = "*",sys_platform = "== 'darwin'"}
+pyobjc = {version = "*",sys_platform = "== 'darwin'"}
 
 [requires]
 python_version = "3.7"

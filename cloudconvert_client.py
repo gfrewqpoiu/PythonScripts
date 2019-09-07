@@ -19,6 +19,8 @@ async def main() -> None:
     queue = await get_queue(host)  # type: Deque[Job]
     output = ["Currently Running Job:", str(queue.popleft()), "Other Jobs:"]  # type: List[Union[str, Job]]
     output.extend(queue)
+    for job in queue:
+        print(str(job))
     layout = [[sg.Text("Here are the jobs:")],
               [sg.Listbox(output)],
               [sg.CloseButton("Close")]]
