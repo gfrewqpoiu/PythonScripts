@@ -157,3 +157,5 @@ Würde src/aiofiles/tests/ löschen
 Würde src/aiofiles/tox.ini löschen
 
 src/
+
+Pipfile.lock
