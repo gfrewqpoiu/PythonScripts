@@ -1,6 +1,6 @@
 -i https://pypi.org/simple
 appscript==1.1.0 ; sys_platform == 'darwin'
-asn1crypto==0.24.0
+asn1crypto==1.0.1
 beautifulsoup4==4.8.0
 cchardet==2.1.4
 certifi==2019.9.11
