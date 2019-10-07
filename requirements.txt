@@ -1,7 +1,7 @@
 -i https://pypi.org/simple
 appscript==1.1.0 ; sys_platform == 'darwin'
-asn1crypto==0.24.0
-beautifulsoup4==4.8.0
+asn1crypto==1.0.1
+beautifulsoup4==4.8.1
 cchardet==2.1.4
 certifi==2019.9.11
 cffi==1.12.3
@@ -11,8 +11,9 @@ git+https://github.com/Tinche/aiofiles.git@145107595fe72b877005fb4ebf9d77ffb7546
 idna==2.8
 lxml==4.4.1
 nest-asyncio==1.2.0
-peewee==3.10.0
+peewee==3.11.2
 pycparser==2.19
+pyobjc==5.2 ; sys_platform == 'darwin'
 pyopenssl==19.0.0
 pyside2==5.13.1 ; sys_platform == 'darwin'
 pysimplegui==4.4.1
@@ -21,5 +22,5 @@ requests[security]==2.22.0
 rumps==0.3.0 ; sys_platform == 'darwin'
 shiboken2==5.13.1
 six==1.12.0
-soupsieve==1.9.3
-urllib3==1.25.3
+soupsieve==1.9.4
+urllib3==1.25.6
