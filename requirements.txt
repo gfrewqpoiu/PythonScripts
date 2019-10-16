@@ -4,7 +4,7 @@ asn1crypto==1.0.1
 beautifulsoup4==4.8.1
 cchardet==2.1.4
 certifi==2019.9.11
-cffi==1.12.3
+cffi==1.13.0
 chardet==3.0.4
 cryptography==2.7
 git+https://github.com/Tinche/aiofiles.git@145107595fe72b877005fb4ebf9d77ffb754689a#egg=aiofiles
