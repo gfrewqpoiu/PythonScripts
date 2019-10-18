@@ -6,7 +6,7 @@ cchardet==2.1.4
 certifi==2019.9.11
 cffi==1.12.3
 chardet==3.0.4
-cryptography==2.7
+cryptography==2.8
 git+https://github.com/Tinche/aiofiles.git@145107595fe72b877005fb4ebf9d77ffb754689a#egg=aiofiles
 idna==2.8
 lxml==4.4.1
