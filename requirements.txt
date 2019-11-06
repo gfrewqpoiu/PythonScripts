@@ -20,7 +20,7 @@ pysimplegui==4.4.1
 pysimpleguiqt==0.28.0 ; sys_platform == 'darwin'
 requests[security]==2.22.0
 rumps==0.3.0 ; sys_platform == 'darwin'
-shiboken2==5.13.1
+shiboken2==5.13.2
 six==1.12.0
 soupsieve==1.9.4
 urllib3==1.25.6
