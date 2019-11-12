@@ -92,6 +92,19 @@ def sortoutputwindow(contents: List[str]):
     window.Close()
 
 
+def getTextInputWindow(title: str = "Title", text: str = "Text"):
+    layout = [[sg.Text(text)],
+              [sg.InputText(key="_INPUT_")],
+              [sg.Cancel(), sg.OK()]]
+    window = sg.Window(title, layout)
+    event, values = window.Read()
+    window.Close()
+    if event == "OK":
+        return values["_INPUT_"]
+    else:
+        raise AttributeError("The user cancelled the Input Prompt.")
+
+
 if __name__ == '__main__':
     pprint.pprint(home)
     pprint.pprint(getInputWindow())
