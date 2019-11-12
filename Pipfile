@@ -24,6 +24,10 @@ lxml = "*"
 requests = {extras = ["security"],version = "*"}
 rumps = {version = "*",sys_platform = "== 'darwin'"}
 pyobjc = {version = "*",sys_platform = "== 'darwin'"}
+anyio = "*"
+sniffio = "*"
+trio = "*"
+httpx = "*"
 
 [requires]
 python_version = "3.7"
