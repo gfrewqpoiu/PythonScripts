@@ -159,3 +159,5 @@ Würde src/aiofiles/tox.ini löschen
 src/
 
 Pipfile.lock
+
+.DS_Store
