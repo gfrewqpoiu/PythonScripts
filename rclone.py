@@ -32,6 +32,8 @@ class RcloneItem(ABC):
     Both files and folders."""
 
     def __init__(self, item, drive: str, path):
+        self._item = item
+        self._orig_path = path
         self.drive = drive  # type: str
         self.path = PurePosixPath(path, item['Path'])
         if not drive.endswith(':'):
@@ -171,6 +173,9 @@ class RcloneDirectory(RcloneItem):
             if search in item.name.lower():
                 return item
         return None
+
+    def __repr__(self):
+        return f"RcloneDirectory({self._item}, {self.drive}, {self._orig_path})"
 
 
 async def ls(drive: str, directory: Union[str, PurePosixPath], recursive_flat: bool = False) -> List[RcloneItem]:

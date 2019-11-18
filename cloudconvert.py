@@ -23,7 +23,7 @@ running_job: 'Job'
 class Job:
     _temppath = temppath
     newext = ".mp4"
-    log = logging.getLogger()
+    log = logger
 
     def __init__(self, inputfile: rclone.RcloneFile):
         self.is_downloaded = False
@@ -107,7 +107,7 @@ async def check_to_convert(file: rclone.RcloneFile, contents: List[rclone.Rclone
 
 async def worker(queue: asyncio.Queue) -> NoReturn:
     global running_job
-    log = logging.getLogger()
+    log = logger
     while True:
         job = await queue.get()
         running_job = job
@@ -152,7 +152,7 @@ async def main(drive: str, path: Union[str, PurePosixPath] = basepath) -> None:
                     await queue.put(job)
 
     queue = asyncio.Queue(loop=loop)
-    log = logging.getLogger()
+    log = logger
     root = await rclone.tree(drive, path)
     task = asyncio.create_task(worker(queue))
     server = asyncio.create_task(create_server())

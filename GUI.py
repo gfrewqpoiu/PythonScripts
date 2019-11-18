@@ -2,7 +2,7 @@ import os
 import pprint
 from rclone import RcloneItem
 from pathlib import Path
-from typing import List
+from typing import List, Tuple, Dict
 import sys
 if sys.platform == "darwin":
     import PySimpleGUIQt as sg  # type: ignore
@@ -33,7 +33,7 @@ def getInputWindow(titletext: str = "Input File"):
     return event, values
 
 
-def getFolderInputWindow(titletext: str = "Input Folder", initial_folder: str = home):
+def getFolderInputWindow(titletext: str = "Input Folder", initial_folder: str = home) -> Tuple[str, Dict[str, str]]:
     layout = [[sg.Text("Select a folder:")],
               [sg.Input(), sg.FolderBrowse("Select Folder", initial_folder=initial_folder)],
               [sg.OK(), sg.Cancel()]]
@@ -41,6 +41,20 @@ def getFolderInputWindow(titletext: str = "Input Folder", initial_folder: str = 
     event, values = window.Read()
     window.Close()
     return event, values
+
+
+def getFolderRecursiveWindow(title_text: str = "Input Folder", initial_folder: str = home, recuse_text: str = "Include subdirectories?") -> Tuple[str, bool]:
+    layout = [[sg.Text("Select a folder:")],
+              [sg.Input(key="_FOLDER_"), sg.FolderBrowse("Select Folder", initial_folder=initial_folder)],
+              [sg.Checkbox(recuse_text, key="_RECURSIVE_")],
+              [sg.OK(), sg.Cancel()]]
+    window = sg.Window(title_text, layout)
+    event, values = window.Read()
+    window.Close()
+    if event == "OK":
+        return values["_FOLDER_"], bool(values["_RECURSIVE_"])
+    else:
+        raise AttributeError("The user cancelled the Input Prompt.")
 
 
 def getOutputWindow(titletext: str = "Output File", prefill: str = ""):
@@ -92,7 +106,7 @@ def sortoutputwindow(contents: List[str]):
     window.Close()
 
 
-def getTextInputWindow(title: str = "Title", text: str = "Text"):
+def getTextInputWindow(title: str = "Title", text: str = "Text") -> str:
     layout = [[sg.Text(text)],
               [sg.InputText(key="_INPUT_")],
               [sg.Cancel(), sg.OK()]]
@@ -105,7 +119,34 @@ def getTextInputWindow(title: str = "Title", text: str = "Text"):
         raise AttributeError("The user cancelled the Input Prompt.")
 
 
+def getDualTextInputWindow(title: str, field_1: str, field_2: str) -> Tuple[str, str]:
+    layout = [[sg.Text(field_1)],
+              [sg.InputText(key="_INPUT1_")],
+              [sg.Text(field_2)],
+              [sg.InputText(key="_INPUT2_")],
+              [sg.Cancel(), sg.OK()]]
+    window = sg.Window(title, layout)
+    event, values = window.Read()
+    window.Close()
+    if event == "OK":
+        return values["_INPUT1_"], values["_INPUT2_"]
+    else:
+        raise AttributeError("The user cancelled the Input Prompt.")
+
+
+def getButtonWindow(title: str, buttons: List[str]) -> str:
+    layout = []
+    for elem in buttons:
+        layout.append([sg.Button(elem)])
+    layout.append([sg.Cancel()])
+    window = sg.Window(title, layout=layout)
+    event, values = window.Read()
+    window.Close()
+    if not event == "Cancel":
+        return event
+    else:
+        raise AttributeError("The user cancelled the Prompt.")
+
+
 if __name__ == '__main__':
-    pprint.pprint(home)
-    pprint.pprint(getInputWindow())
-    pprint.pprint(getOutputWindow(prefill=""))
+    pass
