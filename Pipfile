@@ -27,6 +27,7 @@ sniffio = "*"
 trio = "*"
 httpx = "*"
 loguru = "*"
+pyautogui = "*"
 
 [requires]
 python_version = "3.7"
