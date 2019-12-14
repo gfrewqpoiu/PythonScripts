@@ -4,12 +4,10 @@ from rclone import RcloneItem
 from pathlib import Path
 from typing import List, Tuple, Dict
 import sys
-if sys.platform == "darwin":
-    import PySimpleGUIQt as sg  # type: ignore
-else:
-    import PySimpleGUI as sg  # type: ignore
+import PySimpleGUI as sg  # type: ignore
 
 home = os.fsdecode(Path.home())
+sg.change_look_and_feel("SystemDefaultForReal")
 
 
 def getInputOutputWindow(titletext="Select File"):

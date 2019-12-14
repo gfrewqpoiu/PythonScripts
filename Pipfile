@@ -14,10 +14,8 @@ mypy = "*"
 aiofiles = {git = "https://github.com/Tinche/aiofiles.git"}
 appscript = {version = "*",sys_platform = "== 'darwin'"}
 peewee = "*"
-pyside2 = {version = "*",sys_platform = "== 'darwin'"}
 nest-asyncio = "*"
 pysimplegui = "*"
-pysimpleguiqt = {version = "*",sys_platform = "== 'darwin'"}
 cchardet = "*"
 beautifulsoup4 = "*"
 lxml = "*"
