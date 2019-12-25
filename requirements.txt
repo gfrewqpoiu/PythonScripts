@@ -1,37 +1,43 @@
 -i https://pypi.org/simple
-anyio==1.2.0
+anyio==1.2.1
 appscript==1.1.0 ; sys_platform == 'darwin'
 async-generator==1.10
 attrs==19.3.0
-beautifulsoup4==4.8.1
+beautifulsoup4==4.8.2
 cchardet==2.1.5
-certifi==2019.9.11
+certifi==2019.11.28
 cffi==1.13.2
 chardet==3.0.4
 cryptography==2.8
 git+https://github.com/Tinche/aiofiles.git@145107595fe72b877005fb4ebf9d77ffb754689a#egg=aiofiles
-h11==0.9.0
+h11==0.8.1
 h2==3.1.1
 hpack==3.0.0
-hstspreload==2019.11.19
-httpx==0.7.8
+hstspreload==2019.12.25
+httpx==0.9.5
 hyperframe==5.2.0
 idna==2.8
-loguru==0.3.2
-lxml==4.4.1
-nest-asyncio==1.2.0
+loguru==0.4.0
+lxml==4.4.2
+mouseinfo==0.1.2
+nest-asyncio==1.2.1
 outcome==1.0.1
-peewee==3.11.2
+peewee==3.13.1
+pillow==6.2.1 ; python_version == '3.7'
+pyautogui==0.9.48
 pycparser==2.19
+pygetwindow==0.0.8
+pymsgbox==1.0.7
 pyobjc==6.1 ; sys_platform == 'darwin'
 pyopenssl==19.1.0
-pyside2==5.13.2 ; sys_platform == 'darwin'
-pysimplegui==4.6.0
-pysimpleguiqt==0.30.0 ; sys_platform == 'darwin'
+pyperclip==1.7.0
+pyrect==0.1.4
+pyscreeze==0.1.25
+pysimplegui==4.14.0
+pytweening==1.0.3
 requests[security]==2.22.0
 rfc3986==1.3.2
 rumps==0.3.0 ; sys_platform == 'darwin'
-shiboken2==5.13.2 ; sys_platform == 'darwin'
 six==1.13.0
 sniffio==1.1.0
 sortedcontainers==2.1.0
