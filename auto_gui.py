@@ -24,7 +24,6 @@ def main():
             pyautogui.click()
             pyautogui.press('right')
 
-
     except KeyboardInterrupt:
         print('\n')
 
