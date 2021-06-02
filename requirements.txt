@@ -43,4 +43,4 @@ sniffio==1.1.0
 sortedcontainers==2.1.0
 soupsieve==1.9.5
 trio==0.13.0
-urllib3==1.25.7
+urllib3==1.26.5
