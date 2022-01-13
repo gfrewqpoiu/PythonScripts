@@ -23,7 +23,7 @@ mouseinfo==0.1.2
 nest-asyncio==1.2.1
 outcome==1.0.1
 peewee==3.13.1
-pillow==6.2.1 ; python_version == '3.7'
+pillow==9.0.0 ; python_version == '3.7'
 pyautogui==0.9.48
 pycparser==2.19
 pygetwindow==0.0.8
